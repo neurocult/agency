@@ -6,3 +6,4 @@
 - https://github.com/cpacker/MemGPT
 - https://github.com/Significant-Gravitas/AutoGPT
 - https://github.com/OpenBMB/XAgent
+- https://github.com/sashabaranov/go-openai

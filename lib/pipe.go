@@ -37,6 +37,14 @@ func (t TextMessage) Bind(args ...any) TextMessage {
 	}
 }
 
+type ImageMessage struct {
+	bb []byte
+}
+
+func (i ImageMessage) Bytes() []byte {
+	return i.bb
+}
+
 type Role string
 
 const (

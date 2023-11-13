@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"image/png"
+	"os"
 	"strconv"
 
 	"github.com/emil14/ai/lib"
@@ -75,7 +78,7 @@ func main() {
 
 		// continue text
 		func() error {
-			pipe := lib.CompletionPipe(openaiClient)
+			pipe := lib.TextPipe(openaiClient)
 			msg, err := pipe(ctx, lib.UserMessage("What is the capital of the great Britain?"))
 			if err != nil {
 				return err
@@ -87,8 +90,8 @@ func main() {
 		// rewrite (translate from english to french) text
 		func() error {
 			systemMsg := lib.SystemMessage("You are a helpful assistant that translates English to French")
-			
-			pipe := lib.CompletionPipe(openaiClient, systemMsg)
+
+			pipe := lib.TextPipe(openaiClient, systemMsg)
 			msg, err := pipe(ctx, lib.UserMessage("I love programming."))
 			if err != nil {
 				return err
@@ -100,13 +103,44 @@ func main() {
 		// templating
 		func() error {
 			systemMsg := lib.SystemMessage("You are a helpful assistant that translates %s to %s").Bind("English", "French")
-			pipe := lib.CompletionPipe(openaiClient, systemMsg)
+			pipe := lib.TextPipe(openaiClient, systemMsg)
 
 			msg, err := pipe(ctx, lib.UserMessage("%s").Bind("I love programming."))
 			if err != nil {
 				return err
 			}
 			fmt.Println(string(msg.Bytes()))
+
+			return nil
+		},
+
+		// text2img
+		func() error {
+			pipe := lib.ImagePipe(openaiClient)
+
+			msg, err := pipe(
+				ctx,
+				lib.UserMessage("halloween night at a haunted museum."),
+			)
+			if err != nil {
+				return err
+			}
+
+			r := bytes.NewReader(msg.Bytes())
+			imgData, err := png.Decode(r)
+			if err != nil {
+				return err
+			}
+
+			file, err := os.Create("example.png")
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			if err := png.Encode(file, imgData); err != nil {
+				return err
+			}
 
 			return nil
 		},
