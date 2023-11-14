@@ -70,3 +70,5 @@ func ImagePipe(client *openai.Client) core.Pipe {
 		return core.NewImageMessage(imgBytes), nil
 	}
 }
+
+
