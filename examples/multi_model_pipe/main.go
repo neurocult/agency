@@ -21,15 +21,15 @@ func main() {
 
 	openAIClient := goopenai.NewClient("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")
 
-	var ai = openai.NewPipeFactory(openAIClient)
+	gpt3 := openai.NewTextToText(openAIClient, goopenai.GPT3Dot5Turbo)
+	gpt4 := openai.NewTextToText(openAIClient, goopenai.GPT4TurboPreview)
+	whisper := openai.NewSpeechToText(openAIClient, goopenai.Whisper1)
 
-	hear := ai.SpeechToText()
-
-	summarize := ai.TextToText(
+	hear := whisper()  // pipe 1
+	summarize := gpt3( // pipe 2
 		core.NewSystemMessage("summarize: "),
 	)
-
-	capitalize := ai.TextToText(
+	capitalize := gpt4( // pipe3
 		core.NewSystemMessage("capitalize: "),
 	)
 

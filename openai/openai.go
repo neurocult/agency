@@ -56,7 +56,7 @@ func NewTextToText(client *openai.Client, model string) core.Configurator {
 	}
 }
 
-func TextToImage(client *openai.Client, model string) core.Configurator {
+func NewTextToImage(client *openai.Client, model string) core.Configurator {
 	return func(prefix ...core.Message) core.Pipe {
 		return func(ctx context.Context, msg core.Message) (core.Message, error) {
 			reqBase64 := openai.ImageRequest{
@@ -81,13 +81,14 @@ func TextToImage(client *openai.Client, model string) core.Configurator {
 	}
 }
 
-func SpeechToText(client *openai.Client, model string) core.Configurator {
+func NewSpeechToText(client *openai.Client, model string) core.Configurator {
 	return func(prefix ...core.Message) core.Pipe {
 		return func(ctx context.Context, msg core.Message) (core.Message, error) {
 			resp, err := client.CreateTranscription(ctx, openai.AudioRequest{
 				Model:    openai.Whisper1,
 				FilePath: "voice.ogg",
 				Reader:   bytes.NewReader(msg.Bytes()),
+				// Prompt: , TODO use prefix here
 			})
 
 			if err != nil {
