@@ -21,24 +21,25 @@ func main() {
 
 	openAIClient := goopenai.NewClient("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")
 
-	gpt3 := openai.TextToText(openAIClient, goopenai.GPT3Dot5Turbo)
-	gpt4 := openai.TextToText(openAIClient, goopenai.GPT4TurboPreview)
-	whisper := openai.SpeechToText(openAIClient, goopenai.Whisper1)
+	// step 1
+	hear := openai.
+		SpeechToText(openAIClient, goopenai.Whisper1).
+		Pipe()
 
-	// pipe 1
-	hear := whisper()
+	// step 2
+	summarize := openai.
+		TextToText(openAIClient, goopenai.GPT3Dot5Turbo).
+		Pipe(
+			core.WithTemperature[core.TextConfig](0.5),
+			core.WithSystemMessage("summarize: "),
+		)
 
-	// pipe 2
-	summarize := gpt3(
-		core.WithTemperature[core.TextConfig](0.5),
-		core.WithSystemMessage("summarize: "),
-	)
+	// step 3
+	capitalize := openai.
+		TextToText(openAIClient, goopenai.GPT4TurboPreview).
+		Pipe(core.WithSystemMessage("capitalize: "))
 
-	// pipe3
-	capitalize := gpt4(
-		core.WithSystemMessage("capitalize: "),
-	)
-
+	// execute the whole pipeline
 	msg, err := hear.
 		Then(summarize).
 		Then(capitalize).

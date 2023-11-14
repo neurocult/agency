@@ -59,6 +59,11 @@ func WithPrompt(prompt string) Option[SpeechConfig] {
 
 type PipeFactory[T SpecificConfig] func(options ...Option[T]) Pipe
 
+// Pipe is just a sintactic sugar over regular function call
+func (p PipeFactory[SpecificConfig]) Pipe(options ...Option[SpecificConfig]) Pipe {
+	return p(options...)
+}
+
 type Option[T SpecificConfig] func(cfg *Config[T])
 
 func WithTemperature[T SpecificConfig](temperature float32) Option[T] {

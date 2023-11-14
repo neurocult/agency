@@ -35,13 +35,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	file, err := os.Create("example.png")
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
-
 	if err := png.Encode(file, imgData); err != nil {
 		panic(err)
 	}
