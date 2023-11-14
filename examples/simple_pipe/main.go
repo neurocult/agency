@@ -11,7 +11,7 @@ import (
 func main() {
 	var incPipe core.Pipe = incrementPipe
 
-	incPipe = incPipe.Chain(incPipe).Chain(incPipe)
+	incPipe = incPipe.Then(incPipe).Then(incPipe)
 
 	msg, err := incPipe(context.Background(), core.NewUserMessage("0"))
 	if err != nil {
