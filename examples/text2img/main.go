@@ -16,7 +16,9 @@ import (
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	pipe := openai.ImagePipe(openAIClient)
+	var factory core.PipeFactory = openai.NewPipeFactory(openAIClient)
+
+	pipe := factory.TextToImage()
 
 	msg, err := pipe(
 		context.Background(),

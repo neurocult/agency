@@ -15,8 +15,8 @@
 // continue text
 // rewrite text
 // templating (dynamic translator e.g.)
-// voice -> text
 // text -> image
+// voice -> text
 // image -> text
 // voice -> text -> image
 // image -> text -> voice

@@ -10,7 +10,11 @@ import (
 	"github.com/eqtlab/lib/core"
 )
 
-func TextPipe(client *openai.Client, prefix ...core.TextMessage) core.Pipe {
+type PipeFactory struct {
+	client *openai.Client
+}
+
+func (o PipeFactory) TextToText(prefix ...core.TextMessage) core.Pipe {
 	openAIMessages := make([]openai.ChatCompletionMessage, 0, len(prefix))
 	for _, textMsg := range prefix {
 		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
@@ -25,7 +29,7 @@ func TextPipe(client *openai.Client, prefix ...core.TextMessage) core.Pipe {
 			Content: string(msg.Bytes()),
 		})
 
-		resp, err := client.CreateChatCompletion(
+		resp, err := o.client.CreateChatCompletion(
 			ctx,
 			openai.ChatCompletionRequest{
 				Model:    openai.GPT3Dot5Turbo,
@@ -48,7 +52,7 @@ func TextPipe(client *openai.Client, prefix ...core.TextMessage) core.Pipe {
 	}
 }
 
-func ImagePipe(client *openai.Client) core.Pipe {
+func (o PipeFactory) TextToImage() core.Pipe {
 	return func(ctx context.Context, msg core.Message) (core.Message, error) {
 		reqBase64 := openai.ImageRequest{
 			Prompt:         string(msg.Bytes()),
@@ -57,7 +61,7 @@ func ImagePipe(client *openai.Client) core.Pipe {
 			N:              1,
 		}
 
-		respBase64, err := client.CreateImage(ctx, reqBase64)
+		respBase64, err := o.client.CreateImage(ctx, reqBase64)
 		if err != nil {
 			return nil, err
 		}
@@ -71,4 +75,8 @@ func ImagePipe(client *openai.Client) core.Pipe {
 	}
 }
 
-
+func NewPipeFactory(client *openai.Client) PipeFactory {
+	return PipeFactory{
+		client: client,
+	}
+}

@@ -63,3 +63,8 @@ func UserMessage(content string) TextMessage {
 func SystemMessage(content string) TextMessage {
 	return TextMessage{Role: SystemRole, Content: content}
 }
+
+type PipeFactory interface {
+	TextToText(prefix ...TextMessage) Pipe
+	TextToImage() Pipe
+}

@@ -11,10 +11,13 @@ import (
 )
 
 func main() {
-	openaiClient := goopenai.NewClient("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")
+	openAIClient := goopenai.NewClient("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")
+
+	var factory core.PipeFactory = openai.NewPipeFactory(openAIClient)
 
 	systemMsg := core.SystemMessage("You are a helpful assistant that translates %s to %s").Bind("English", "French")
-	pipe := openai.TextPipe(openaiClient, systemMsg)
+
+	pipe := factory.TextToText(systemMsg)
 
 	boundUserMsg := core.UserMessage("%s").Bind("I love programming.")
 

@@ -13,7 +13,9 @@ import (
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	pipe := openai.TextPipe(openAIClient)
+	var factory core.PipeFactory = openai.NewPipeFactory(openAIClient)
+
+	pipe := factory.TextToText()
 	userMsg := core.UserMessage("What is the capital of the great Britain?")
 
 	resultMsg, err := pipe(context.Background(), userMsg)
