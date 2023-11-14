@@ -13,15 +13,18 @@ import (
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	var factory core.Config = openai.NewPipeFactory(openAIClient)
+	gpt3 := openai.TextToText(openAIClient, goopenai.GPT3Dot5Turbo)
 
-	systemMsg := core.NewSystemMessage("You are a helpful assistant that translates %s to %s").Bind("English", "French")
+	pipe := gpt3(
+		core.WithSystemMessage(
+			"You are a helpful assistant that translates %s to %s",
+			"English", "French",
+		),
+	)
 
-	pipe := factory.TextToText(systemMsg)
+	userMsg := core.NewUserMessage("%s").Bind("I love programming.")
 
-	boundUserMsg := core.NewUserMessage("%s").Bind("I love programming.")
-
-	resultMsg, err := pipe(context.Background(), boundUserMsg)
+	resultMsg, err := pipe(context.Background(), userMsg)
 	if err != nil {
 		panic(err)
 	}

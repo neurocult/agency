@@ -13,11 +13,13 @@ import (
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	var factory core.Config = openai.NewPipeFactory(openAIClient)
+	gpt3 := openai.TextToText(openAIClient, goopenai.GPT3Dot5Turbo)
 
-	systemMsg := core.NewSystemMessage("You are a helpful assistant that translates English to French")
-
-	pipe := factory.TextToText(systemMsg)
+	pipe := gpt3(
+		core.WithSystemMessage(
+			"You are a helpful assistant that translates English to French",
+		),
+	)
 
 	userMsg := core.NewUserMessage("I love programming.")
 

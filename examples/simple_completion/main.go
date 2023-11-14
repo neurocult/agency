@@ -13,10 +13,11 @@ import (
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	var factory core.Config = openai.NewPipeFactory(openAIClient)
+	gpt3 := openai.TextToText(openAIClient, goopenai.GPT3Dot5Turbo)
 
-	pipe := factory.TextToText()
-	userMsg := core.NewUserMessage("What is the capital of the great Britain?")
+	pipe := gpt3()
+
+	userMsg := core.NewUserMessage("What is the capital of Great Britain?")
 
 	resultMsg, err := pipe(context.Background(), userMsg)
 	if err != nil {

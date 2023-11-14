@@ -16,11 +16,11 @@ import (
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	// openai.CreateImageSize256x256
+	whisper := openai.TextToImage(openAIClient, goopenai.CreateImageModelDallE2)
 
-	var factory core.Config = openai.NewPipeFactory(openAIClient)
-
-	pipe := factory.TextToImage()
+	pipe := whisper(
+		core.WithSize(goopenai.CreateImageSize256x256),
+	)
 
 	msg, err := pipe(
 		context.Background(),
