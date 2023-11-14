@@ -16,7 +16,7 @@ import (
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	var factory core.Configurator = openai.NewPipeFactory(openAIClient)
+	var factory core.Config = openai.NewPipeFactory(openAIClient)
 
 	pipe := factory.TextToImage()
 

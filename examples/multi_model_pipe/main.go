@@ -25,12 +25,15 @@ func main() {
 	gpt4 := openai.NewTextToText(openAIClient, goopenai.GPT4TurboPreview)
 	whisper := openai.NewSpeechToText(openAIClient, goopenai.Whisper1)
 
-	hear := whisper()  // pipe 1
+	hear := whisper() // pipe 1
+
 	summarize := gpt3( // pipe 2
-		core.NewSystemMessage("summarize: "),
+		core.WithTemperature[core.TextConfig](0.5), // TODO: use temperature in openai
+		core.WithMessages(core.NewSystemMessage("summarize: ")),
 	)
+
 	capitalize := gpt4( // pipe3
-		core.NewSystemMessage("capitalize: "),
+		core.WithMessages(core.NewSystemMessage("capitalize: ")),
 	)
 
 	msg, err := hear.

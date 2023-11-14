@@ -82,6 +82,3 @@ func NewSpeechMessage(bb []byte) SpeechMessage {
 		bb: bb,
 	}
 }
-
-// shouldn't we also return err?
-type Configurator func(...Message) Pipe

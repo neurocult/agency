@@ -4,60 +4,20 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"errors"
 
 	"github.com/sashabaranov/go-openai"
 
 	"github.com/eqtlab/lib/core"
 )
 
-func NewTextToText(client *openai.Client, model string) core.Configurator {
-	return func(prefix ...core.Message) core.Pipe {
-		openAIMessages := make([]openai.ChatCompletionMessage, 0, len(prefix))
-		for _, msg := range prefix {
-			textMsg, ok := msg.(core.TextMessage)
-			if !ok {
-				panic("not ok") // TODO handle err
-			}
-
-			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    string(textMsg.Role),
-				Content: textMsg.Content,
-			})
-		}
-
-		return func(ctx context.Context, msg core.Message) (core.Message, error) {
-			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleUser,
-				Content: string(msg.Bytes()),
-			})
-
-			resp, err := client.CreateChatCompletion(
-				ctx,
-				openai.ChatCompletionRequest{
-					Model:    openai.GPT3Dot5Turbo,
-					Messages: openAIMessages,
-				},
-			)
-			if err != nil {
-				return nil, err
-			}
-
-			if len(resp.Choices) < 1 {
-				return nil, errors.New("no choice")
-			}
-			choice := resp.Choices[0].Message
-
-			return core.TextMessage{
-				Content: choice.Content,
-				Role:    core.Role(choice.Role),
-			}, nil
-		}
-	}
+type ImageConfig struct {
 }
+type ImageConfiguratorOption func(cfg *SpeechConfig)
 
-func NewTextToImage(client *openai.Client, model string) core.Configurator {
-	return func(prefix ...core.Message) core.Pipe {
+type ImageConfigurator func(...ImageConfiguratorOption) core.Pipe
+
+func NewTextToImage(client *openai.Client, model string) ImageConfigurator {
+	return func(prefix ...ImageConfiguratorOption) core.Pipe {
 		return func(ctx context.Context, msg core.Message) (core.Message, error) {
 			reqBase64 := openai.ImageRequest{
 				Prompt:         string(msg.Bytes()),
@@ -81,8 +41,14 @@ func NewTextToImage(client *openai.Client, model string) core.Configurator {
 	}
 }
 
-func NewSpeechToText(client *openai.Client, model string) core.Configurator {
-	return func(prefix ...core.Message) core.Pipe {
+type SpeechConfig struct {
+}
+type SpeechConfiguratorOption func(cfg *SpeechConfig)
+
+type SpeechConfigurator func(...SpeechConfiguratorOption) core.Pipe
+
+func NewSpeechToText(client *openai.Client, model string) SpeechConfigurator {
+	return func(prefix ...SpeechConfiguratorOption) core.Pipe {
 		return func(ctx context.Context, msg core.Message) (core.Message, error) {
 			resp, err := client.CreateTranscription(ctx, openai.AudioRequest{
 				Model:    openai.Whisper1,
