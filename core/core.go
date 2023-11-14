@@ -7,7 +7,7 @@ import (
 
 type Pipe func(context.Context, Message) (Message, error)
 
-func (p Pipe) Chain(next Pipe) Pipe {
+func (p Pipe) Then(next Pipe) Pipe {
 	return func(ctx context.Context, bb Message) (Message, error) {
 		bb, err := p(ctx, bb)
 		if err != nil {
@@ -15,6 +15,10 @@ func (p Pipe) Chain(next Pipe) Pipe {
 		}
 		return next(ctx, bb)
 	}
+}
+
+func (p Pipe) Execute(ctx context.Context, bb Message) (Message, error) {
+	return p(ctx, bb)
 }
 
 type Message interface {
