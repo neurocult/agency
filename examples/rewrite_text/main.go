@@ -15,11 +15,11 @@ func main() {
 
 	var factory core.PipeFactory = openai.NewPipeFactory(openAIClient)
 
-	systemMsg := core.SystemMessage("You are a helpful assistant that translates English to French")
+	systemMsg := core.NewSystemMessage("You are a helpful assistant that translates English to French")
 
 	pipe := factory.TextToText(systemMsg)
 
-	userMsg := core.UserMessage("I love programming.")
+	userMsg := core.NewUserMessage("I love programming.")
 
 	resultMsg, err := pipe(context.Background(), userMsg)
 	if err != nil {

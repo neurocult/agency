@@ -52,19 +52,35 @@ func NewImageMessage(bb []byte) ImageMessage {
 type Role string
 
 const (
-	UserRole   Role = "user"
-	SystemRole Role = "system"
+	UserRole      Role = "user"
+	SystemRole    Role = "system"
+	AssistantRole Role = "assistant"
 )
 
-func UserMessage(content string) TextMessage {
+func NewUserMessage(content string) TextMessage {
 	return TextMessage{Role: UserRole, Content: content}
 }
 
-func SystemMessage(content string) TextMessage {
+func NewSystemMessage(content string) TextMessage {
 	return TextMessage{Role: SystemRole, Content: content}
+}
+
+type SpeechMessage struct {
+	bb []byte
+}
+
+func (s SpeechMessage) Bytes() []byte {
+	return s.bb
+}
+
+func NewSpeechMessage(bb []byte) SpeechMessage {
+	return SpeechMessage{
+		bb: bb,
+	}
 }
 
 type PipeFactory interface {
 	TextToText(prefix ...TextMessage) Pipe
 	TextToImage() Pipe
+	SpeechToText() Pipe
 }

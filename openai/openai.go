@@ -1,6 +1,7 @@
 package openai
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"errors"
@@ -14,7 +15,7 @@ type PipeFactory struct {
 	client *openai.Client
 }
 
-func (o PipeFactory) TextToText(prefix ...core.TextMessage) core.Pipe {
+func (p PipeFactory) TextToText(prefix ...core.TextMessage) core.Pipe {
 	openAIMessages := make([]openai.ChatCompletionMessage, 0, len(prefix))
 	for _, textMsg := range prefix {
 		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
@@ -29,7 +30,7 @@ func (o PipeFactory) TextToText(prefix ...core.TextMessage) core.Pipe {
 			Content: string(msg.Bytes()),
 		})
 
-		resp, err := o.client.CreateChatCompletion(
+		resp, err := p.client.CreateChatCompletion(
 			ctx,
 			openai.ChatCompletionRequest{
 				Model:    openai.GPT3Dot5Turbo,
@@ -52,7 +53,7 @@ func (o PipeFactory) TextToText(prefix ...core.TextMessage) core.Pipe {
 	}
 }
 
-func (o PipeFactory) TextToImage() core.Pipe {
+func (p PipeFactory) TextToImage() core.Pipe {
 	return func(ctx context.Context, msg core.Message) (core.Message, error) {
 		reqBase64 := openai.ImageRequest{
 			Prompt:         string(msg.Bytes()),
@@ -61,7 +62,7 @@ func (o PipeFactory) TextToImage() core.Pipe {
 			N:              1,
 		}
 
-		respBase64, err := o.client.CreateImage(ctx, reqBase64)
+		respBase64, err := p.client.CreateImage(ctx, reqBase64)
 		if err != nil {
 			return nil, err
 		}
@@ -72,6 +73,25 @@ func (o PipeFactory) TextToImage() core.Pipe {
 		}
 
 		return core.NewImageMessage(imgBytes), nil
+	}
+}
+
+func (p PipeFactory) SpeechToText() core.Pipe {
+	return func(ctx context.Context, msg core.Message) (core.Message, error) {
+		resp, err := p.client.CreateTranscription(ctx, openai.AudioRequest{
+			Model:    openai.Whisper1,
+			FilePath: "voice.ogg",
+			Reader:   bytes.NewReader(msg.Bytes()),
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		return core.TextMessage{
+			Role:    core.AssistantRole,
+			Content: resp.Text,
+		}, nil
 	}
 }
 

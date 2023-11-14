@@ -22,7 +22,7 @@ func main() {
 
 	msg, err := pipe(
 		context.Background(),
-		core.UserMessage("halloween night at a haunted museum."),
+		core.NewUserMessage("halloween night at a haunted museum."),
 	)
 	if err != nil {
 		panic(err)

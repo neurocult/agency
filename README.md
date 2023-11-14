@@ -44,3 +44,7 @@
 // help me with my book
 // be my life-copilot (read my notes, give me insights)
 ```
+
+# TODO
+
+metadata (rokens used, audio dur, etc)

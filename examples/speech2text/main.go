@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	goopenai "github.com/sashabaranov/go-openai"
 
@@ -15,13 +16,20 @@ func main() {
 
 	var factory core.PipeFactory = openai.NewPipeFactory(openAIClient)
 
-	pipe := factory.TextToText()
-	userMsg := core.NewUserMessage("What is the capital of the great Britain?")
+	pipe := factory.SpeechToText()
 
-	resultMsg, err := pipe(context.Background(), userMsg)
+	data, err := os.ReadFile("speech.ogg")
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(string(resultMsg.Bytes()))
+	msg, err := pipe(
+		context.Background(),
+		core.NewSpeechMessage(data),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(msg.Bytes()))
 }
