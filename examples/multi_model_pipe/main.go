@@ -21,25 +21,29 @@ func main() {
 
 	openAIClient := goopenai.NewClient("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")
 
-	gpt3 := openai.NewTextToText(openAIClient, goopenai.GPT3Dot5Turbo)
-	gpt4 := openai.NewTextToText(openAIClient, goopenai.GPT4TurboPreview)
-	whisper := openai.NewSpeechToText(openAIClient, goopenai.Whisper1)
+	gpt3 := openai.TextToText(openAIClient, goopenai.GPT3Dot5Turbo)
+	gpt4 := openai.TextToText(openAIClient, goopenai.GPT4TurboPreview)
+	whisper := openai.SpeechToText(openAIClient, goopenai.Whisper1)
 
-	hear := whisper() // pipe 1
+	// pipe 1
+	hear := whisper()
 
-	summarize := gpt3( // pipe 2
-		core.WithTemperature(0.5), // TODO: use temperature in openai
-		core.WithPrompt("summarize: "),
+	// pipe 2
+	summarize := gpt3(
+		core.WithTemperature[core.TextConfig](0.5),
+		core.WithSystemMessage("summarize: "),
 	)
 
-	capitalize := gpt4( // pipe3
-		core.WithPrompt("capitalize: "),
+	// pipe3
+	capitalize := gpt4(
+		core.WithSystemMessage("capitalize: "),
 	)
 
 	msg, err := hear.
 		Then(summarize).
 		Then(capitalize).
 		Execute(ctx, core.NewSpeechMessage(data))
+
 	if err != nil {
 		panic(err)
 	}

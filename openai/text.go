@@ -4,32 +4,24 @@ import (
 	"context"
 	"errors"
 
-	"github.com/eqtlab/lib/core"
 	"github.com/sashabaranov/go-openai"
+
+	"github.com/eqtlab/lib/core"
 )
 
-func NewTextToText(client *openai.Client, model string) core.Configurator[core.TextConfig] {
-	return func(options ...core.ConfiguratorOption[core.TextConfig]) core.Pipe {
-		cfg := &core.Config[core.TextConfig]{}
+func TextToText(client *openai.Client, model string) core.PipeFactory[core.TextConfig] {
+	return func(options ...core.Option[core.TextConfig]) core.Pipe {
+		cfg := core.NewTextConfig(options...)
 
-		for _, opt := range options {
-			opt(cfg)
-		}
-
-		openAIMessages := make([]openai.ChatCompletionMessage, 0, len(options))
-		for _, msg := range cfg.Model.Messages {
-			textMsg, ok := msg.(core.TextMessage)
-			if !ok {
-				panic("not ok") // TODO handle err
-			}
-
+		openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Specific.Messages))
+		for _, msg := range cfg.Specific.Messages {
 			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    string(textMsg.Role),
-				Content: textMsg.Content,
+				Role:    string(msg.Role),
+				Content: msg.Content,
 			})
 		}
 
-		return func(ctx context.Context, msg core.Message) (core.Message, error) {
+		pipe := func(ctx context.Context, msg core.Message) (core.Message, error) {
 			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
 				Role:    openai.ChatMessageRoleUser,
 				Content: string(msg.Bytes()),
@@ -38,8 +30,9 @@ func NewTextToText(client *openai.Client, model string) core.Configurator[core.T
 			resp, err := client.CreateChatCompletion(
 				ctx,
 				openai.ChatCompletionRequest{
-					Model:    openai.GPT3Dot5Turbo,
-					Messages: openAIMessages,
+					Model:       openai.GPT3Dot5Turbo,
+					Messages:    openAIMessages,
+					Temperature: cfg.Temperature,
 				},
 			)
 			if err != nil {
@@ -56,5 +49,7 @@ func NewTextToText(client *openai.Client, model string) core.Configurator[core.T
 				Role:    core.Role(choice.Role),
 			}, nil
 		}
+
+		return pipe
 	}
 }
