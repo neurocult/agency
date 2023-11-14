@@ -13,7 +13,7 @@ import (
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	var factory core.PipeFactory = openai.NewPipeFactory(openAIClient)
+	var factory core.Configurator = openai.NewPipeFactory(openAIClient)
 
 	systemMsg := core.NewSystemMessage("You are a helpful assistant that translates English to French")
 

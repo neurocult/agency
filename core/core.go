@@ -83,8 +83,5 @@ func NewSpeechMessage(bb []byte) SpeechMessage {
 	}
 }
 
-type PipeFactory interface {
-	TextToText(prefix ...TextMessage) Pipe
-	TextToImage() Pipe
-	SpeechToText() Pipe
-}
+// shouldn't we also return err?
+type Configurator func(...Message) Pipe
