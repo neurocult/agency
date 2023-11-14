@@ -24,3 +24,9 @@ func WithMessages(msgs ...Message) ConfiguratorOption[TextConfig] {
 		cfg.Model.Messages = msgs
 	}
 }
+
+func WithPrompt(prompt string, args ...any) ConfiguratorOption[TextConfig] {
+	return func(cfg *Config[TextConfig]) {
+		cfg.Model.Messages = append(cfg.Model.Messages, NewSystemMessage(prompt).Bind(args...))
+	}
+}

@@ -29,11 +29,11 @@ func main() {
 
 	summarize := gpt3( // pipe 2
 		core.WithTemperature(0.5), // TODO: use temperature in openai
-		core.WithMessages(core.NewSystemMessage("summarize: ")),
+		core.WithPrompt("summarize: "),
 	)
 
 	capitalize := gpt4( // pipe3
-		core.WithMessages(core.NewSystemMessage("capitalize: ")),
+		core.WithPrompt("capitalize: "),
 	)
 
 	msg, err := hear.
