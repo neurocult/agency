@@ -30,7 +30,7 @@ func TextToText(client *openai.Client, model string) core.PipeFactory[core.TextC
 			resp, err := client.CreateChatCompletion(
 				ctx,
 				openai.ChatCompletionRequest{
-					Model:       openai.GPT3Dot5Turbo,
+					Model:       model,
 					Messages:    openAIMessages,
 					Temperature: cfg.Temperature,
 				},

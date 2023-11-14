@@ -19,7 +19,7 @@
 // voice -> text
 // image -> text
 // voice -> text -> image
-// image -> text -> voice
+// image -> text -> voice (awaiting for https://github.com/sashabaranov/go-openai/pull/557)
 // function call (print user input message)
 
 // medium:
