@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-// Pipe is basic building block. Pipes can be composed together into pipeline
+// Pipe is basic building block. Pipes can be composed together into pipeline via `Then` method
 type Pipe func(context.Context, Message) (Message, error)
 
 // Then takes a `next` pipe and returns new pipe that wraps `next`

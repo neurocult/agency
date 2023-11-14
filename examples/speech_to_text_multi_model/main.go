@@ -18,26 +18,26 @@ func main() {
 	}
 
 	ctx := context.Background()
-
 	openAIClient := goopenai.NewClient("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")
 
 	// step 1
-	hear := openai.
-		SpeechToText(openAIClient, goopenai.Whisper1).
-		Pipe()
+	hear := openai.SpeechToText(openAIClient, core.SpeechToTextParams{Model: goopenai.Whisper1})
 
 	// step 2
 	summarize := openai.
-		TextToText(openAIClient, goopenai.GPT3Dot5Turbo).
-		Pipe(
-			core.WithTemperature[core.TextConfig](0.5),
-			core.WithSystemMessage("summarize: "),
-		)
+		TextToText(openAIClient, core.TextToTextParams{
+			Model:       goopenai.GPT3Dot5Turbo,
+			Messages:    []core.TextMessage{core.NewSystemMessage("summarize: ")},
+			Temperature: 0.5,
+		})
 
 	// step 3
 	capitalize := openai.
-		TextToText(openAIClient, goopenai.GPT4TurboPreview).
-		Pipe(core.WithSystemMessage("capitalize: "))
+		TextToText(openAIClient, core.TextToTextParams{
+			Model:       goopenai.GPT4TurboPreview,
+			Messages:    []core.TextMessage{core.NewSystemMessage("capitalize: ")},
+			Temperature: 0,
+		})
 
 	// execute the whole pipeline
 	msg, err := hear.

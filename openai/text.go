@@ -9,47 +9,46 @@ import (
 	"github.com/eqtlab/lib/core"
 )
 
-func TextToText(client *openai.Client, model string) core.PipeFactory[core.TextConfig] {
-	return func(options ...core.Option[core.TextConfig]) core.Pipe {
-		cfg := core.NewTextConfig(options...)
+var TextToText core.TextToTextFactory[*openai.Client] = func(client *openai.Client, params core.TextToTextParams) core.Pipe {
+	openAIMessages := textMessagesToOpenAI(params.Messages)
 
-		openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Specific.Messages))
-		for _, msg := range cfg.Specific.Messages {
-			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    string(msg.Role),
-				Content: msg.Content,
-			})
+	return func(ctx context.Context, msg core.Message) (core.Message, error) {
+		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: string(msg.Bytes()),
+		})
+
+		resp, err := client.CreateChatCompletion(
+			ctx,
+			openai.ChatCompletionRequest{
+				Model:       params.Model,
+				Temperature: params.Temperature,
+				Messages:    openAIMessages,
+			},
+		)
+		if err != nil {
+			return nil, err
 		}
 
-		pipe := func(ctx context.Context, msg core.Message) (core.Message, error) {
-			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleUser,
-				Content: string(msg.Bytes()),
-			})
-
-			resp, err := client.CreateChatCompletion(
-				ctx,
-				openai.ChatCompletionRequest{
-					Model:       model,
-					Messages:    openAIMessages,
-					Temperature: cfg.Temperature,
-				},
-			)
-			if err != nil {
-				return nil, err
-			}
-
-			if len(resp.Choices) < 1 {
-				return nil, errors.New("no choice")
-			}
-			choice := resp.Choices[0].Message
-
-			return core.TextMessage{
-				Content: choice.Content,
-				Role:    core.Role(choice.Role),
-			}, nil
+		if len(resp.Choices) < 1 {
+			return nil, errors.New("no choice")
 		}
+		choice := resp.Choices[0].Message
 
-		return pipe
+		return core.TextMessage{
+			Content: choice.Content,
+			Role:    core.Role(choice.Role),
+		}, nil
 	}
+}
+
+func textMessagesToOpenAI(msgs []core.TextMessage) []openai.ChatCompletionMessage {
+	openAIMessages := make([]openai.ChatCompletionMessage, 0, len(msgs))
+	for _, msg := range msgs {
+		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+			Role:    string(msg.Role),
+			Content: msg.Content,
+		})
+	}
+	return openAIMessages
 }
