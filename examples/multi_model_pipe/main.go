@@ -28,7 +28,7 @@ func main() {
 	hear := whisper() // pipe 1
 
 	summarize := gpt3( // pipe 2
-		core.WithTemperature[core.TextConfig](0.5), // TODO: use temperature in openai
+		core.WithTemperature(0.5), // TODO: use temperature in openai
 		core.WithMessages(core.NewSystemMessage("summarize: ")),
 	)
 

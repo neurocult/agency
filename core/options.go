@@ -13,7 +13,7 @@ type Configurator[T any] func(options ...ConfiguratorOption[T]) Pipe
 
 type ConfiguratorOption[T any] func(cfg *Config[T])
 
-func WithTemperature[T any](temperature float32) ConfiguratorOption[T] {
+func WithTemperature[T TextConfig](temperature float32) ConfiguratorOption[T] {
 	return func(cfg *Config[T]) {
 		cfg.Temperature = temperature
 	}
