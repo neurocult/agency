@@ -1,4 +1,4 @@
-package lib
+package core
 
 import (
 	"context"
@@ -43,6 +43,10 @@ type ImageMessage struct {
 
 func (i ImageMessage) Bytes() []byte {
 	return i.bb
+}
+
+func NewImageMessage(bb []byte) ImageMessage {
+	return ImageMessage{bb}
 }
 
 type Role string

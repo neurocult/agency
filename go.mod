@@ -1,4 +1,4 @@
-module github.com/emil14/ai
+module github.com/eqtlab/lib
 
 go 1.21.0
 

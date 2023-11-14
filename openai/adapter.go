@@ -1,4 +1,4 @@
-package lib
+package openai
 
 import (
 	"context"
@@ -6,9 +6,11 @@ import (
 	"errors"
 
 	"github.com/sashabaranov/go-openai"
+
+	"github.com/eqtlab/lib/core"
 )
 
-func TextPipe(client *openai.Client, prefix ...TextMessage) Pipe {
+func TextPipe(client *openai.Client, prefix ...core.TextMessage) core.Pipe {
 	openAIMessages := make([]openai.ChatCompletionMessage, 0, len(prefix))
 	for _, textMsg := range prefix {
 		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
@@ -17,7 +19,7 @@ func TextPipe(client *openai.Client, prefix ...TextMessage) Pipe {
 		})
 	}
 
-	return func(ctx context.Context, msg Message) (Message, error) {
+	return func(ctx context.Context, msg core.Message) (core.Message, error) {
 		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleUser,
 			Content: string(msg.Bytes()),
@@ -39,16 +41,15 @@ func TextPipe(client *openai.Client, prefix ...TextMessage) Pipe {
 		}
 		choice := resp.Choices[0].Message
 
-		return TextMessage{
+		return core.TextMessage{
 			Content: choice.Content,
-			Role:    Role(choice.Role),
+			Role:    core.Role(choice.Role),
 		}, nil
 	}
 }
 
-func ImagePipe(client *openai.Client) Pipe {
-	return func(ctx context.Context, msg Message) (Message, error) {
-		// Sample image by link
+func ImagePipe(client *openai.Client) core.Pipe {
+	return func(ctx context.Context, msg core.Message) (core.Message, error) {
 		reqBase64 := openai.ImageRequest{
 			Prompt:         string(msg.Bytes()),
 			Size:           openai.CreateImageSize256x256,
@@ -66,9 +67,6 @@ func ImagePipe(client *openai.Client) Pipe {
 			return nil, err
 		}
 
-
-		return ImageMessage{
-			bb: imgBytes,
-		}, nil
+		return core.NewImageMessage(imgBytes), nil
 	}
 }
