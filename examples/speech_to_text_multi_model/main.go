@@ -27,20 +27,20 @@ func main() {
 		})
 
 	// step2
-	summarize := openai.
+	translate := openai.
 		TextToText(openAIClient, openai.TextToTextParams{
 			Model:       goopenai.GPT3Dot5Turbo,
 			Temperature: 0.5,
 		}).
-		WithOptions(core.WithPrompt("summarize the text"))
+		WithOptions(core.WithPrompt("translate to russian"))
 
 	// step 3
-	capitalize := openai.
+	uppercase := openai.
 		TextToText(openAIClient, openai.TextToTextParams{
 			Model:       goopenai.GPT4TurboPreview,
 			Temperature: 1,
 		}).
-		WithOptions(core.WithPrompt("capitalize the text"))
+		WithOptions(core.WithPrompt("uppercase every letter of the text"))
 
 	saver := Saver{}
 
@@ -54,18 +54,16 @@ func main() {
 
 	msg, err := hear.
 		Intercept(saver.Save).
-		Then(summarize).
-		Then(capitalize).
+		Then(translate).
+		Then(uppercase).
 		Execute(ctx, speechMsg)
 
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(saver)
-
 	for _, msg := range saver {
-		fmt.Println(string(msg.Bytes()))
+		fmt.Println(msg.String())
 	}
 
 	fmt.Println(msg)
