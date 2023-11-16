@@ -36,6 +36,7 @@ func (p Pipe) Then(next Pipe) Pipe {
 		if err != nil {
 			return nil, err
 		}
+
 		return next(ctx, bb)
 	}
 }
@@ -47,10 +48,6 @@ func (p Pipe) Execute(ctx context.Context, bb Message) (Message, error) {
 
 func (p Pipe) WithOptions(options ...PipeOption) Pipe {
 	return func(ctx context.Context, bb Message, _ ...PipeOption) (Message, error) {
-		bb, err := p(ctx, bb)
-		if err != nil {
-			return nil, err
-		}
 		return p(ctx, bb, options...)
 	}
 }

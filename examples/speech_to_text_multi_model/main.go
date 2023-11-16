@@ -39,18 +39,18 @@ func main() {
 	summarize := thinker.WithOptions(core.WithPrompt("summarize the text"))
 
 	// step 3
-	capitalize := thinker.WithOptions(core.WithPrompt("capitalize the text"))
+	translate := thinker.WithOptions(core.WithPrompt("translate the text to spanish"))
 
 	saver := Saver{}
 
 	save := saver.Save
 
 	// execute the whole pipeline
-	msg, err := hear.
+	_, err = hear.
 		Then(save).
 		Then(summarize).
 		Then(save).
-		Then(capitalize).
+		Then(translate).
 		Then(save).
 		Execute(ctx, core.NewSpeechMessage(data))
 
@@ -58,11 +58,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(saver)
-
 	for _, msg := range saver {
 		fmt.Println(string(msg.Bytes()))
 	}
-
-	fmt.Println(string(msg.Bytes()))
 }

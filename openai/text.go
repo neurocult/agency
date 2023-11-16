@@ -21,7 +21,7 @@ func TextToText(client *openai.Client, params TextToTextParams) core.Pipe {
 		openAIMessages := []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: string(cfg.Prompt),
+				Content: cfg.Prompt,
 			},
 			{
 				Role:    openai.ChatMessageRoleUser,
