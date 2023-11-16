@@ -11,6 +11,13 @@ import (
 	"github.com/eqtlab/lib/openai"
 )
 
+type Saver []core.Message
+
+func (s *Saver) Save(_ context.Context, msg core.Message, _ ...core.PipeOption) (core.Message, error) {
+	*s = append(*s, msg)
+	return msg, nil
+}
+
 func main() {
 	data, err := os.ReadFile("speech.ogg")
 	if err != nil {
@@ -34,14 +41,27 @@ func main() {
 	// step 3
 	capitalize := thinker.WithOptions(core.WithPrompt("capitalize the text"))
 
+	saver := Saver{}
+
+	save := saver.Save
+
 	// execute the whole pipeline
 	msg, err := hear.
+		Then(save).
 		Then(summarize).
+		Then(save).
 		Then(capitalize).
+		Then(save).
 		Execute(ctx, core.NewSpeechMessage(data))
 
 	if err != nil {
 		panic(err)
+	}
+
+	fmt.Println(saver)
+
+	for _, msg := range saver {
+		fmt.Println(string(msg.Bytes()))
 	}
 
 	fmt.Println(string(msg.Bytes()))
