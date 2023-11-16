@@ -9,14 +9,25 @@ import (
 	"github.com/eqtlab/lib/core"
 )
 
-var TextToText core.TextToTextFactory[*openai.Client] = func(client *openai.Client, params core.TextToTextParams) core.Pipe {
-	openAIMessages := textMessagesToOpenAI(params.Messages)
+type TextToTextParams struct {
+	Model       string
+	Temperature float32
+}
 
-	return func(ctx context.Context, msg core.Message) (core.Message, error) {
-		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
-			Content: string(msg.Bytes()),
-		})
+func TextToText(client *openai.Client, params TextToTextParams) core.Pipe {
+	return func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
+		cfg := core.NewPipeConfig(options...)
+
+		openAIMessages := []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: string(cfg.Prompt),
+			},
+			{
+				Role:    openai.ChatMessageRoleUser,
+				Content: string(msg.Bytes()),
+			},
+		}
 
 		resp, err := client.CreateChatCompletion(
 			ctx,
@@ -40,15 +51,4 @@ var TextToText core.TextToTextFactory[*openai.Client] = func(client *openai.Clie
 			Role:    core.Role(choice.Role),
 		}, nil
 	}
-}
-
-func textMessagesToOpenAI(msgs []core.TextMessage) []openai.ChatCompletionMessage {
-	openAIMessages := make([]openai.ChatCompletionMessage, 0, len(msgs))
-	for _, msg := range msgs {
-		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-			Role:    string(msg.Role),
-			Content: msg.Content,
-		})
-	}
-	return openAIMessages
 }

@@ -9,17 +9,24 @@ import (
 	"github.com/eqtlab/lib/core"
 )
 
-var SpeechToText core.SpeechToTextFactory[*openai.Client] = func(client *openai.Client, params core.SpeechToTextParams) core.Pipe {
-	return func(ctx context.Context, msg core.Message) (core.Message, error) {
+type SpeechToTextParams struct {
+	Model string
+}
+
+func SpeechToText(client *openai.Client, params SpeechToTextParams) core.Pipe {
+	return func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
+		cfg := core.NewPipeConfig(options...)
+
 		resp, err := client.CreateTranscription(ctx, openai.AudioRequest{
 			Model:    params.Model,
-			Prompt:   params.Prompt,
+			Prompt:   cfg.Prompt,
 			FilePath: "voice.ogg",
 			Reader:   bytes.NewReader(msg.Bytes()),
 		})
 		if err != nil {
 			return nil, err
 		}
+
 		return core.TextMessage{
 			Role:    core.AssistantRole,
 			Content: resp.Text,
