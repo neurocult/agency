@@ -5,6 +5,7 @@ import "fmt"
 // Message represents abstract message
 type Message interface {
 	Bytes() []byte
+	String() string
 }
 
 type TextMessage struct {
@@ -14,6 +15,10 @@ type TextMessage struct {
 
 func (t TextMessage) Bytes() []byte {
 	return []byte(t.Content)
+}
+
+func (t TextMessage) String() string {
+	return t.Content
 }
 
 // Bind allows to use prompt as a template by replacing printf directives like `%s` with the given `args`
@@ -30,6 +35,10 @@ type ImageMessage struct {
 
 func (i ImageMessage) Bytes() []byte {
 	return i.bb
+}
+
+func (ImageMessage) String() string {
+	return "<ImageMessage>"
 }
 
 func NewImageMessage(bb []byte) ImageMessage {
@@ -60,6 +69,10 @@ type SpeechMessage struct {
 
 func (s SpeechMessage) Bytes() []byte {
 	return s.bb
+}
+
+func (SpeechMessage) String() string {
+	return "<SpeechMessage>"
 }
 
 func NewSpeechMessage(bb []byte) SpeechMessage {
