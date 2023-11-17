@@ -14,8 +14,8 @@ type TextToTextParams struct {
 	Temperature float32
 }
 
-func TextToText(client *openai.Client, params TextToTextParams) core.Pipe {
-	return func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
+func TextToText(client *openai.Client, params TextToTextParams) *core.Pipe {
+	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
 		cfg := core.NewPipeConfig(options...)
 
 		openAIMessages := []openai.ChatCompletionMessage{
@@ -25,7 +25,7 @@ func TextToText(client *openai.Client, params TextToTextParams) core.Pipe {
 			},
 			{
 				Role:    openai.ChatMessageRoleUser,
-				Content: string(msg.Bytes()),
+				Content: msg.String(),
 			},
 		}
 
@@ -50,5 +50,5 @@ func TextToText(client *openai.Client, params TextToTextParams) core.Pipe {
 			Content: choice.Content,
 			Role:    core.Role(choice.Role),
 		}, nil
-	}
+	})
 }

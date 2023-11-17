@@ -15,8 +15,8 @@ type TextToImageParams struct {
 	ImageSize string
 }
 
-func TextToImage(client *openai.Client, params TextToImageParams) core.Pipe {
-	return func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
+func TextToImage(client *openai.Client, params TextToImageParams) *core.Pipe {
+	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
 		cfg := core.NewPipeConfig(options...)
 
 		reqBase64 := openai.ImageRequest{
@@ -38,5 +38,5 @@ func TextToImage(client *openai.Client, params TextToImageParams) core.Pipe {
 		}
 
 		return core.NewImageMessage(imgBytes), nil
-	}
+	})
 }
