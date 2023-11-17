@@ -17,14 +17,15 @@ func New(pipes ...*core.Pipe) *Pipeline {
 	}
 }
 
-func (p *Pipeline) InterceptEach(interceptor core.Interceptor) *Pipeline {
-	p.interceptors = append(p.interceptors, interceptor)
+// AfterEach
+func (p *Pipeline) AfterEach(interceptor ...core.Interceptor) *Pipeline {
+	p.interceptors = append(p.interceptors, interceptor...)
 	return p
 }
 
 func (p *Pipeline) Execute(ctx context.Context, message core.Message) (core.Message, error) {
 	for _, pipe := range p.pipes {
-		pipe.Intercept(p.interceptors...)
+		pipe.After(p.interceptors...)
 
 		var err error
 		message, err = pipe.Execute(ctx, message)

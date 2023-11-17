@@ -58,7 +58,7 @@ func main() {
 		translate,
 		uppercase,
 	).
-		InterceptEach(saver.Save).
+		AfterEach(saver.Save).
 		Execute(ctx, speechMsg)
 
 	if err != nil {

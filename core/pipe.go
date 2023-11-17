@@ -4,27 +4,27 @@ import (
 	"context"
 )
 
-// Pipe is basic building block. Pipes can be composed together into pipeline via `Then` method
+// Pipe is basic building block.
 type Pipe struct {
 	handler      func(context.Context, Message, ...PipeOption) (Message, error)
 	interceptors []Interceptor
 	options      []PipeOption
 }
 
+// NewPipe allows to create Pipe from a function.
 func NewPipe(handler func(context.Context, Message, ...PipeOption) (Message, error)) *Pipe {
 	return &Pipe{
 		handler: handler,
 	}
 }
 
-// Intercept allows execute code on each step of the pipeline.
-// Interceptor called inside `Then` so it only works for pipelines with >= 2 steps
-func (p *Pipe) Intercept(interceptor ...Interceptor) *Pipe {
+// After allows execute code after pipe to intercept execution between pipes.
+func (p *Pipe) After(interceptor ...Interceptor) *Pipe {
 	p.interceptors = append(p.interceptors, interceptor...)
 	return p
 }
 
-// Execute executes the whole pipeline. It's just sugar over regular function call
+// Execute executes the whole pipeline.
 func (p *Pipe) Execute(ctx context.Context, input Message) (Message, error) {
 	output, err := p.handler(ctx, input, p.options...)
 	if err != nil {
@@ -38,8 +38,11 @@ func (p *Pipe) Execute(ctx context.Context, input Message) (Message, error) {
 	return output, nil
 }
 
-// WithOptions allows to specify pipe options without execution.
+// WithOptions allows to specify pipe options.
 func (p *Pipe) WithOptions(options ...PipeOption) *Pipe {
-	p.options = options
-	return p
+	return &Pipe{
+		handler:      p.handler,
+		interceptors: p.interceptors,
+		options:      options,
+	}
 }
