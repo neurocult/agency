@@ -6,6 +6,7 @@ import "fmt"
 type Message interface {
 	Bytes() []byte
 	String() string
+	// Type() MessageType
 }
 
 type TextMessage struct {

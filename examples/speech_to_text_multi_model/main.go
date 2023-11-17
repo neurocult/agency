@@ -13,8 +13,8 @@ import (
 
 type Saver []core.Message
 
-func (s *Saver) Save(msg core.Message, _ ...core.PipeOption) {
-	*s = append(*s, msg)
+func (s *Saver) Save(input, output core.Message, _ ...core.PipeOption) {
+	*s = append(*s, output)
 }
 
 func main() {
