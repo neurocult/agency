@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/eqtlab/lib/pipeline"
 	goopenai "github.com/sashabaranov/go-openai"
 
 	"github.com/eqtlab/lib/core"
@@ -37,7 +38,7 @@ func main() {
 	// step 3
 	uppercase := openai.
 		TextToText(openAIClient, openai.TextToTextParams{
-			Model:       goopenai.GPT4TurboPreview,
+			Model:       goopenai.GPT3Dot5Turbo,
 			Temperature: 1,
 		}).
 		WithOptions(core.WithPrompt("uppercase every letter of the text"))
@@ -52,10 +53,12 @@ func main() {
 	ctx := context.Background()
 	speechMsg := core.NewSpeechMessage(sound)
 
-	msg, err := hear.
-		Intercept(saver.Save).
-		Then(translate).
-		Then(uppercase).
+	pipeline.New(
+		hear,
+		translate,
+		uppercase,
+	).
+		InterceptEach(saver.Save).
 		Execute(ctx, speechMsg)
 
 	if err != nil {
@@ -65,6 +68,4 @@ func main() {
 	for _, msg := range saver {
 		fmt.Println(msg.String())
 	}
-
-	fmt.Println(msg)
 }
