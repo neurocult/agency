@@ -18,15 +18,15 @@ func Logger(input, output core.Message, options ...core.PipeOption) {
 func main() {
 	openAIClient := goopenai.NewClient("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")
 
-	text2text := openai.TextToText(openAIClient, openai.TextToTextParams{
+	textPipe := openai.TextToText(openAIClient, openai.TextToTextParams{
 		Model:       goopenai.GPT3Dot5Turbo,
 		Temperature: 0.5,
 	})
 
 	_, err := pipeline.New(
-		text2text.WithOptions(core.WithPrompt("explain what that means")),
-		text2text.WithOptions(core.WithPrompt("translate to russian")),
-		text2text.WithOptions(core.WithPrompt("replace all spaces with '_' ")),
+		textPipe.WithOptions(core.WithPrompt("explain what that means")),
+		textPipe.WithOptions(core.WithPrompt("translate to russian")),
+		textPipe.WithOptions(core.WithPrompt("replace all spaces with '_' ")),
 	).
 		AfterEach(Logger).
 		Execute(context.Background(), core.NewUserMessage("Kazakhstan alga!"))

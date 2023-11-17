@@ -53,7 +53,7 @@ func main() {
 	ctx := context.Background()
 	speechMsg := core.NewSpeechMessage(sound)
 
-	pipeline.New(
+	_, err = pipeline.New(
 		hear,
 		translate,
 		uppercase,

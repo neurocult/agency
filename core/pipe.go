@@ -38,7 +38,7 @@ func (p *Pipe) Execute(ctx context.Context, input Message) (Message, error) {
 	return output, nil
 }
 
-// WithOptions allows to specify pipe options.
+// WithOptions returns new Pipe with specified options.
 func (p *Pipe) WithOptions(options ...PipeOption) *Pipe {
 	return &Pipe{
 		handler:      p.handler,
