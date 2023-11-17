@@ -32,7 +32,7 @@ func (p *Pipe) Execute(ctx context.Context, input Message) (Message, error) {
 	}
 
 	for _, interceptor := range p.interceptors {
-		interceptor(input, output)
+		interceptor(input, output, p.options...)
 	}
 
 	return output, nil

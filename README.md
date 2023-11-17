@@ -49,6 +49,9 @@ Pure Go langchain alternative.
 # TODO
 
 ## v0.1.0
+
+-[ ] Remove auth token from source code :D
+-[ ] Remove test media files (example.png, *.ogg) (but make sure examples are work)
 -[ ] Name the project
 -[ ] Name the organization
 -[ ] Make readme with quickstart, description, installation, etc
