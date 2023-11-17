@@ -8,12 +8,13 @@
 - https://github.com/OpenBMB/XAgent
 - https://github.com/sashabaranov/go-openai
 
+# Description
+Pure Go langchain alternative.
+
 # Use-Cases
 
 ```
-// easy:
-// continue text
-// rewrite text
+
 // templating (dynamic translator e.g.)
 // text -> image
 // voice -> text
@@ -47,4 +48,24 @@
 
 # TODO
 
-metadata (rokens used, audio dur, etc)
+## v0.1.0
+-[ ] Name the project
+-[ ] Name the organization
+-[ ] Make readme with quickstart, description, installation, etc
+-[ ] Reorganize the folders and packages
+-[ ] Add examples
+  -[ ] Add simple pipe example
+  -[ ] Add chat example
+  -[ ] Add chat multi-model example (voice=>text=>image)
+  -[ ] Add templating example
+-[ ] Add models support
+  -[ ] Add ChatGPT support
+  -[ ] Add Whisper support
+  -[ ] Add Dall-E support
+  -[ ] Add GPT Vision support (optional)
+
+## Next versions
+-[ ] Add support for external functions
+-[ ] Add RAG example with function
+-[ ] metadata (tokens used, audio dur, etc)
+-[ ] Add llama support
