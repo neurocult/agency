@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"github.com/eqtlab/lib/pipeline"
+	_ "github.com/joho/godotenv/autoload"
 	goopenai "github.com/sashabaranov/go-openai"
 
 	"github.com/eqtlab/lib/core"
 	"github.com/eqtlab/lib/openai"
+	"github.com/eqtlab/lib/pipeline"
 )
 
 func Logger(input, output core.Message, options ...core.PipeOption) {
@@ -16,9 +18,9 @@ func Logger(input, output core.Message, options ...core.PipeOption) {
 }
 
 func main() {
-	openAIClient := goopenai.NewClient("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")
+	factory := openai.New(os.Getenv("OPENAI_API_KEY"))
 
-	textPipe := openai.TextToText(openAIClient, openai.TextToTextParams{
+	textPipe := factory.TextToText(openai.TextToTextParams{
 		Model:       goopenai.GPT3Dot5Turbo,
 		Temperature: 0.5,
 	})
@@ -26,7 +28,7 @@ func main() {
 	_, err := pipeline.New(
 		textPipe.WithOptions(core.WithPrompt("explain what that means")),
 		textPipe.WithOptions(core.WithPrompt("translate to russian")),
-		textPipe.WithOptions(core.WithPrompt("replace all spaces with '_' ")),
+		textPipe.WithOptions(core.WithPrompt("replace all spaces with '_'")),
 	).
 		AfterEach(Logger).
 		Execute(context.Background(), core.NewUserMessage("Kazakhstan alga!"))

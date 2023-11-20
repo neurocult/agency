@@ -50,6 +50,7 @@ Pure Go langchain alternative.
 
 ## v0.1.0
 
+-[ ] `TextToText(openAIClient, openai.TextToTextParams{Model: goopenai.GPT3Dot5Turbo})` - remove client from this example?
 -[ ] Remove auth token from source code :D
 -[ ] Remove test media files (example.png, *.ogg) (but make sure examples are work)
 -[ ] Name the project

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/eqtlab/lib/pipeline"
+	_ "github.com/joho/godotenv/autoload"
 	goopenai "github.com/sashabaranov/go-openai"
 
 	"github.com/eqtlab/lib/core"
@@ -19,25 +20,25 @@ func (s *Saver) Save(input, output core.Message, _ ...core.PipeOption) {
 }
 
 func main() {
-	openAIClient := goopenai.NewClient("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")
+	factory := openai.New(os.Getenv("OPENAI_API_KEY"))
 
 	// step 1
-	hear := openai.
-		SpeechToText(openAIClient, openai.SpeechToTextParams{
+	hear := factory.
+		SpeechToText(openai.SpeechToTextParams{
 			Model: goopenai.Whisper1,
 		})
 
 	// step2
-	translate := openai.
-		TextToText(openAIClient, openai.TextToTextParams{
+	translate := factory.
+		TextToText(openai.TextToTextParams{
 			Model:       goopenai.GPT3Dot5Turbo,
 			Temperature: 0.5,
 		}).
 		WithOptions(core.WithPrompt("translate to russian"))
 
 	// step 3
-	uppercase := openai.
-		TextToText(openAIClient, openai.TextToTextParams{
+	uppercase := factory.
+		TextToText(openai.TextToTextParams{
 			Model:       goopenai.GPT3Dot5Turbo,
 			Temperature: 1,
 		}).

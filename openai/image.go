@@ -5,9 +5,8 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/sashabaranov/go-openai"
-
 	"github.com/eqtlab/lib/core"
+	"github.com/sashabaranov/go-openai"
 )
 
 type TextToImageParams struct {
@@ -15,7 +14,7 @@ type TextToImageParams struct {
 	ImageSize string
 }
 
-func TextToImage(client *openai.Client, params TextToImageParams) *core.Pipe {
+func (f Factory) TextToImage(params TextToImageParams) *core.Pipe {
 	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
 		cfg := core.NewPipeConfig(options...)
 
@@ -27,7 +26,7 @@ func TextToImage(client *openai.Client, params TextToImageParams) *core.Pipe {
 			Model:          params.Model,
 		}
 
-		respBase64, err := client.CreateImage(ctx, reqBase64)
+		respBase64, err := f.client.CreateImage(ctx, reqBase64)
 		if err != nil {
 			return nil, err
 		}

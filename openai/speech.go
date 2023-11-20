@@ -4,20 +4,19 @@ import (
 	"bytes"
 	"context"
 
-	"github.com/sashabaranov/go-openai"
-
 	"github.com/eqtlab/lib/core"
+	"github.com/sashabaranov/go-openai"
 )
 
 type SpeechToTextParams struct {
 	Model string
 }
 
-func SpeechToText(client *openai.Client, params SpeechToTextParams) *core.Pipe {
+func (f Factory) SpeechToText(params SpeechToTextParams) *core.Pipe {
 	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
 		cfg := core.NewPipeConfig(options...)
 
-		resp, err := client.CreateTranscription(ctx, openai.AudioRequest{
+		resp, err := f.client.CreateTranscription(ctx, openai.AudioRequest{
 			Model:    params.Model,
 			Prompt:   cfg.Prompt,
 			FilePath: "voice.ogg",

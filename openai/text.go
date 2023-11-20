@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/sashabaranov/go-openai"
-
 	"github.com/eqtlab/lib/core"
+	"github.com/sashabaranov/go-openai"
 )
 
 type TextToTextParams struct {
@@ -14,7 +13,7 @@ type TextToTextParams struct {
 	Temperature float32
 }
 
-func TextToText(client *openai.Client, params TextToTextParams) *core.Pipe {
+func (f Factory) TextToText(params TextToTextParams) *core.Pipe {
 	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
 		cfg := core.NewPipeConfig(options...)
 
@@ -29,7 +28,7 @@ func TextToText(client *openai.Client, params TextToTextParams) *core.Pipe {
 			},
 		}
 
-		resp, err := client.CreateChatCompletion(
+		resp, err := f.client.CreateChatCompletion(
 			ctx,
 			openai.ChatCompletionRequest{
 				Model:       params.Model,

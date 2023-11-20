@@ -12,9 +12,9 @@ import (
 	"github.com/weaviate/weaviate/entities/models"
 )
 
-// FIXME 1) search works bad 2) pipelines aren't used
+// TODO 1) add pipelines 2) add "with distance" examples
 func main() {
-	openAPIKey := "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"
+	openAPIKey := os.Getenv("OPENAI_API_KEY")
 
 	client, err := weaviate.NewClient(weaviate.Config{
 		Host:   "localhost:8080",
