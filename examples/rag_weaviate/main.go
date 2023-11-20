@@ -26,12 +26,17 @@ func main() {
 	}
 
 	factory := openai.New(openAPIKey)
-	rag := RAGPipe(client)
-	stt := factory.TextToSpeech(openai.TextToSpeechParams{
+	retrieve := RAGPipe(client)
+	summarize := factory.TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).WithOptions(core.WithPrompt("summarize"))
+	voice := factory.TextToSpeech(openai.TextToSpeechParams{
 		Model: "tts-1", ResponseFormat: "mp3", Speed: 1, Voice: "onyx",
 	})
 
-	result, err := pipeline.New(rag, stt).Execute(ctx, core.NewUserMessage("programming"))
+	result, err := pipeline.New(
+		retrieve,
+		summarize,
+		voice,
+	).Execute(ctx, core.NewUserMessage("programming"))
 	if err != nil {
 		panic(err)
 	}
