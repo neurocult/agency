@@ -68,6 +68,7 @@ Pure Go langchain alternative.
   -[ ] Add GPT Vision support (optional)
 
 ## Next versions
+
 -[ ] Add support for external functions
 -[ ] Add RAG example with function
 -[ ] metadata (tokens used, audio dur, etc)

@@ -2,18 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/weaviate/weaviate-go-client/v4/weaviate"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/graphql"
 	"github.com/weaviate/weaviate/entities/models"
-
-	"github.com/eqtlab/lib/core"
 )
-
-func Logger(input, output core.Message, options ...core.PipeOption) {
-	fmt.Printf("in: %v\nout: %v\noptions: %v\n", input, output, options)
-}
 
 // FIXME 1) search works bad 2) pipelines aren't used
 func main() {
@@ -45,18 +42,8 @@ func main() {
 
 	ctx := context.Background()
 
-	// insert (and vectorize via openai) 3 Records
-	resp, err := client.Batch().ObjectsBatcher().WithObjects(&models.Object{
-		Class: "Records",
-		Properties: map[string]string{
-			"content": "Today I learned that memory in golang can leak",
-		},
-	}, &models.Object{
-		Class: "Records",
-		Properties: map[string]string{
-			"content": "Did you know that cats have weird fifth finger?",
-		},
-	}).Do(ctx)
+	// insert and vectorize via openai
+	resp, err := client.Batch().ObjectsBatcher().WithObjects(data...).Do(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -73,11 +60,37 @@ func main() {
 		WithClassName("Records").
 		WithFields(fields...).
 		WithNearText(nearText).
-		WithLimit(2).
+		WithLimit(5).
 		Do(ctx)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("query about programming", result)
+}
+
+type ContentItem struct {
+	Content string `json:"content"`
+}
+
+func readAndParseJSON(path string) []ContentItem {
+	file, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	byteValue, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	var items []ContentItem
+
+	err = json.Unmarshal(byteValue, &items)
+	if err != nil {
+		panic(err)
+	}
+
+	return items
 }
