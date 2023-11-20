@@ -2,6 +2,9 @@ package core
 
 import "fmt"
 
+// PipeConfig represents abstract pipe configuration.
+// It contains fields for all possible modalities but nothing specific to concrete model implementations.
+// It allows dynamically create variations of pipes depending on request.
 type PipeConfig struct {
 	Prompt string
 }

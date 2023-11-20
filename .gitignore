@@ -26,3 +26,6 @@ go.work
 
 # env
 .env
+
+# generation artifacts
+example.mp3
