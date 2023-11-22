@@ -13,13 +13,17 @@ import (
 )
 
 func main() {
-	fmt.Print("Enter text: ")
+	ctx := context.Background()
 	reader := bufio.NewReader(os.Stdin)
-	systemMesage := "You are helpful assistant."
-	assistant := openai.New(os.Getenv("OPENAI_API_KEY")).TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).WithPrompt(systemMesage)
 	history := []core.Message{}
+	assistant := openai.
+		New(os.Getenv("OPENAI_API_KEY")).
+		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
+		WithPrompt("You are helpful assistant.")
 
 	for {
+		fmt.Print("User: ")
+
 		text, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("An error occurred while reading input. Please try again", err)
@@ -28,9 +32,7 @@ func main() {
 
 		input := core.NewUserMessage(text)
 
-		answer, err := assistant.
-			WithMessages(history).
-			Execute(context.Background(), input)
+		answer, err := assistant.WithMessages(history).Execute(ctx, input)
 		if err != nil {
 			panic(err)
 		}

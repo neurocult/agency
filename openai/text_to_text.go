@@ -22,8 +22,8 @@ func (f Factory) TextToText(params TextToTextParams) *core.Pipe {
 			Content: cfg.Prompt,
 		})
 
-		for _, msg = range cfg.Messages {
-			textMsg, ok := msg.(core.TextMessage)
+		for _, history := range cfg.Messages {
+			textMsg, ok := history.(core.TextMessage)
 			if !ok {
 				return nil, errors.New("...")
 			}
