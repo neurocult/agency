@@ -17,7 +17,7 @@ type TextToSpeechParams struct {
 }
 
 func (f Factory) TextToSpeech(params TextToSpeechParams) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
+	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
 		resp, err := f.client.CreateSpeech(ctx, openai.CreateSpeechRequest{
 			Model:          openai.SpeechModel(params.Model),
 			Input:          msg.String(),

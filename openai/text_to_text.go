@@ -14,19 +14,30 @@ type TextToTextParams struct {
 }
 
 func (f Factory) TextToText(params TextToTextParams) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
-		cfg := core.NewPipeConfig(options...)
+	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
+		openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
 
-		openAIMessages := []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleSystem,
-				Content: cfg.Prompt,
-			},
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: msg.String(),
-			},
+		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: cfg.Prompt,
+		})
+
+		for _, msg = range cfg.Messages {
+			textMsg, ok := msg.(core.TextMessage)
+			if !ok {
+				return nil, errors.New("...")
+			}
+
+			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+				Role:    string(textMsg.Role),
+				Content: textMsg.Content,
+			})
 		}
+
+		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: msg.String(),
+		})
 
 		resp, err := f.client.CreateChatCompletion(
 			ctx,

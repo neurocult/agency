@@ -13,8 +13,8 @@ type SpeechToTextParams struct {
 }
 
 func (f Factory) SpeechToText(params SpeechToTextParams) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
-		cfg := core.NewPipeConfig(options...)
+	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
+		// cfg := core.NewPipeConfig(options...)
 
 		resp, err := f.client.CreateTranscription(ctx, openai.AudioRequest{
 			Model:    params.Model,

@@ -25,14 +25,11 @@ func (p *Pipeline) AfterEach(interceptor ...core.Interceptor) *Pipeline {
 
 func (p *Pipeline) Execute(ctx context.Context, message core.Message) (core.Message, error) {
 	for _, pipe := range p.pipes {
-		pipe.After(p.interceptors...)
-
 		var err error
 		message, err = pipe.Execute(ctx, message)
 		if err != nil {
 			return nil, err
 		}
 	}
-
 	return message, nil
 }

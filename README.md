@@ -50,23 +50,15 @@ Pure Go langchain alternative.
 
 ## v0.1.0
 
--[ ] `TextToText(openAIClient, openai.TextToTextParams{Model: goopenai.GPT3Dot5Turbo})` - remove client from this example?
--[ ] Remove auth token from source code :D
+-[ ] simplify config (move to pipe struct)
+-[ ] remove interceptors
 -[ ] Remove test media files (example.png, *.ogg) (but make sure examples are work)
--[ ] Name the project
 -[ ] Name the organization
+-[ ] Name the project (agency)
 -[ ] Make readme with quickstart, description, installation, etc
 -[ ] Reorganize the folders and packages
 -[ ] Add examples
-  -[ ] Add simple pipe example
   -[ ] Add chat example
-  -[ ] Add chat multi-model example (voice=>text=>image)
-  -[ ] Add templating example
--[ ] Add models support
-  -[ ] Add ChatGPT support
-  -[ ] Add Whisper support
-  -[ ] Add Dall-E support
-  -[ ] Add GPT Vision support (optional)
 
 ## Next versions
 
@@ -74,3 +66,7 @@ Pure Go langchain alternative.
 -[ ] Add RAG example with function
 -[ ] metadata (tokens used, audio dur, etc)
 -[ ] Add llama support
+-[ ] try to replace interceptors as a higher level abstraction
+-[ ] Add chat multi-model example (voice=>text=>image)
+-[ ] Add GPT Vision support (optional)
+-[ ] Caching like in autogen

@@ -15,9 +15,7 @@ type TextToImageParams struct {
 }
 
 func (f Factory) TextToImage(params TextToImageParams) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, options ...core.PipeOption) (core.Message, error) {
-		cfg := core.NewPipeConfig(options...)
-
+	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
 		reqBase64 := openai.ImageRequest{
 			Prompt:         fmt.Sprintf("%s\n\n%s", cfg.Prompt, string(msg.Bytes())),
 			Size:           params.ImageSize,
