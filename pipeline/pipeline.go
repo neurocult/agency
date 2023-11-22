@@ -7,8 +7,7 @@ import (
 )
 
 type Pipeline struct {
-	pipes        []*core.Pipe
-	interceptors []core.Interceptor
+	pipes []*core.Pipe
 }
 
 func New(pipes ...*core.Pipe) *Pipeline {
@@ -17,19 +16,22 @@ func New(pipes ...*core.Pipe) *Pipeline {
 	}
 }
 
-// AfterEach
-func (p *Pipeline) AfterEach(interceptor ...core.Interceptor) *Pipeline {
-	p.interceptors = append(p.interceptors, interceptor...)
-	return p
-}
+// Interceptor is a function that is called after one pipe and before another.
+type Interceptor func(in core.Message, out core.Message, cfg *core.PipeConfig)
 
-func (p *Pipeline) Execute(ctx context.Context, message core.Message) (core.Message, error) {
+func (p *Pipeline) Execute(ctx context.Context, input core.Message, interceptors ...Interceptor) (core.Message, error) {
 	for _, pipe := range p.pipes {
-		var err error
-		message, err = pipe.Execute(ctx, message)
+		output, err := pipe.Execute(ctx, input)
 		if err != nil {
 			return nil, err
 		}
+
+		for _, interceptor := range interceptors {
+			interceptor(input, output, pipe.Config())
+		}
+
+		input = output
 	}
-	return message, nil
+
+	return input, nil
 }

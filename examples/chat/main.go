@@ -42,18 +42,3 @@ func main() {
 		history = append(history, input, answer)
 	}
 }
-
-func saveToDisk(msg core.Message) error {
-	file, err := os.Create("example.mp3")
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.Write(msg.Bytes())
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
