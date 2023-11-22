@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	factory := openai.New(os.Getenv("OPENAI_API_KEY"))
+	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	msg, err := factory.TextToImage(openai.TextToImageParams{
 		Model:     goopenai.CreateImageModelDallE2,

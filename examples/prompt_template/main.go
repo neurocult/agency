@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	factory := openai.New(os.Getenv("OPENAI_API_KEY"))
+	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	resultMsg, err := factory.
 		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).

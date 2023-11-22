@@ -1,72 +1,24 @@
-# Inspiration
+# Agency
 
-- https://python.langchain.com/
-- https://github.com/tmc/langchaingo
-- https://github.com/yoheinakajima/babyagi
-- https://github.com/cpacker/MemGPT
-- https://github.com/Significant-Gravitas/AutoGPT
-- https://github.com/OpenBMB/XAgent
-- https://github.com/sashabaranov/go-openai
-
-# Description
 Pure Go langchain alternative.
 
-# Use-Cases
-
-```
-
-// templating (dynamic translator e.g.)
-// text -> image
-// voice -> text
-// image -> text
-// voice -> text -> image
-// image -> text -> voice (awaiting for https://github.com/sashabaranov/go-openai/pull/557)
-// function call (print user input message)
-
-// medium:
-// chat (use assistant API?)
-// chat with voice from user
-// chat with voice from both user and system
-// text -> summarize with small gpt3 -> answer with gpt4
-// image -> image (edit image / variations)
-// sequential multiple function calls
-// concurrent multiple function calls
-// conditional function calls (depending on user's input)
-
-// hard:
-// RAG - (file-system, vector database, relational database)
-// fine-tuning - (make it answer in a desired form)
-// phone-call - (similar to how chatGPT works)
-// group-function calls - (like google meet works, maybe as a google meet member)
-
-// extra-hard (autonomous agents)
-// find a job for me
-// help me with my coding pet-project
-// help me with my book
-// be my life-copilot (read my notes, give me insights)
-```
-
-# TODO
+# Roadmap
 
 ## v0.1.0
 
--[ ] simplify config (move to pipe struct)
--[ ] remove interceptors
--[ ] Remove test media files (example.png, *.ogg) (but make sure examples are work)
+-[ ] Remove test media files (example.png, *.ogg) (but make sure examples are working)
 -[ ] Name the organization
 -[ ] Name the project (agency)
 -[ ] Make readme with quickstart, description, installation, etc
 -[ ] Reorganize the folders and packages
--[ ] Add examples
-  -[ ] Add chat example
 
-## Next versions
+## Next Versions
 
 -[ ] Add support for external functions
--[ ] Add RAG example with function
--[ ] metadata (tokens used, audio dur, etc)
+  -[ ] Add RAG example with function call
+-[ ] Metadata (tokens used, audio dur, etc)
 -[ ] Add llama support
--[ ] try to replace interceptors as a higher level abstraction
+-[ ] Try to replace interceptors as a higher level abstraction
 -[ ] Add chat multi-model example (voice=>text=>image)
--[ ] Add GPT Vision support (optional)
+-[ ] Add GPT Vision support
 -[ ] Caching like in autogen

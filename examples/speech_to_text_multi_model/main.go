@@ -20,7 +20,7 @@ func (s *Saver) Save(input, output core.Message, _ *core.PipeConfig) {
 }
 
 func main() {
-	factory := openai.New(os.Getenv("OPENAI_API_KEY"))
+	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	// step 1
 	hear := factory.

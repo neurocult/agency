@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	factory := openai.New(os.Getenv("OPENAI_API_KEY"))
+	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	result, err := factory.
 		TextToText(openai.TextToTextParams{Model: goopenai.GPT3Dot5Turbo}).

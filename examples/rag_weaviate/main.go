@@ -25,7 +25,7 @@ func main() {
 		panic(err)
 	}
 
-	factory := openai.New(openAPIKey)
+	factory := openai.New(openai.Params{Key: openAPIKey})
 	retrieve := RAGPipe(client)
 	summarize := factory.TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).WithPrompt("summarize")
 	voice := factory.TextToSpeech(openai.TextToSpeechParams{

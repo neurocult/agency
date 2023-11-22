@@ -17,7 +17,7 @@ func main() {
 		There is evil there that does not sleep, and the Great Eye is ever watchful.
 	`)
 
-	msg, err := openai.New(os.Getenv("OPENAI_API_KEY")).
+	msg, err := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")}).
 		TextToSpeech(openai.TextToSpeechParams{
 			Model:          "tts-1",
 			ResponseFormat: "mp3",

@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	factory := openai.New(os.Getenv("OPENAI_API_KEY"))
+	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	data, err := os.ReadFile("speech.ogg")
 	if err != nil {
