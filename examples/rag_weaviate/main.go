@@ -27,7 +27,7 @@ func main() {
 
 	factory := openai.New(openAPIKey)
 	retrieve := RAGPipe(client)
-	summarize := factory.TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).WithOptions(core.WithPrompt("summarize"))
+	summarize := factory.TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).WithPrompt("summarize")
 	voice := factory.TextToSpeech(openai.TextToSpeechParams{
 		Model: "tts-1", ResponseFormat: "mp3", Speed: 1, Voice: "onyx",
 	})
@@ -48,7 +48,7 @@ func main() {
 
 // RAGPipe retrieves relevant objects from vector store and builds a text message to pass further to the pipeline
 func RAGPipe(client *weaviate.Client) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, po ...core.PipeOption) (core.Message, error) {
+	return core.NewPipe(func(ctx context.Context, msg core.Message, po *core.PipeConfig) (core.Message, error) {
 		input := msg.String()
 
 		result, err := client.GraphQL().Get().

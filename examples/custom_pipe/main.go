@@ -23,7 +23,7 @@ func main() {
 	fmt.Println(msg)
 }
 
-func incrementFunc(ctx context.Context, msg core.Message, _ ...core.PipeOption) (core.Message, error) {
+func incrementFunc(ctx context.Context, msg core.Message, _ *core.PipeConfig) (core.Message, error) {
 	i, err := strconv.ParseInt(string(msg.Bytes()), 10, 10)
 	if err != nil {
 		return nil, err

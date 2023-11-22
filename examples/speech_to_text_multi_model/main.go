@@ -15,7 +15,7 @@ import (
 
 type Saver []core.Message
 
-func (s *Saver) Save(input, output core.Message, _ ...core.PipeOption) {
+func (s *Saver) Save(input, output core.Message, _ *core.PipeConfig) {
 	*s = append(*s, output)
 }
 
@@ -34,7 +34,7 @@ func main() {
 			Model:       goopenai.GPT3Dot5Turbo,
 			Temperature: 0.5,
 		}).
-		WithOptions(core.WithPrompt("translate to russian"))
+		WithPrompt("translate to russian")
 
 	// step 3
 	uppercase := factory.
@@ -42,7 +42,7 @@ func main() {
 			Model:       goopenai.GPT3Dot5Turbo,
 			Temperature: 1,
 		}).
-		WithOptions(core.WithPrompt("uppercase every letter of the text"))
+		WithPrompt("uppercase every letter of the text")
 
 	saver := Saver{}
 
@@ -58,10 +58,7 @@ func main() {
 		hear,
 		translate,
 		uppercase,
-	).
-		AfterEach(saver.Save).
-		Execute(ctx, speechMsg)
-
+	).Execute(ctx, speechMsg, saver.Save)
 	if err != nil {
 		panic(err)
 	}

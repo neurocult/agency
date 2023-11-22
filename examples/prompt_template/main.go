@@ -16,11 +16,9 @@ func main() {
 
 	resultMsg, err := factory.
 		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
-		WithOptions(
-			core.WithPrompt(
-				"You are a helpful assistant that translates %s to %s",
-				"English", "French",
-			),
+		WithPrompt(
+			"You are a helpful assistant that translates %s to %s",
+			"English", "French",
 		).
 		Execute(
 			context.Background(),
