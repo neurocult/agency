@@ -13,11 +13,12 @@ import (
 	"github.com/eqtlab/lib/pipeline"
 )
 
+// FIXME this example probably does not work because interceptor is executed after and not before the pipe
 func main() {
 	factory := openai.
 		New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
-	writer := factory.
+	poet := factory.
 		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
 		WithPrompt("You are a poet, your task is to create poems on a given topic.")
 
@@ -31,7 +32,7 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Print("Enter the theme for poem: ")
+	fmt.Print("Enter the word: ")
 	text, err := reader.ReadString('\n')
 	if err != nil {
 		panic(err)
@@ -41,15 +42,15 @@ func main() {
 	ctx := context.Background()
 	input := core.NewUserMessage(text)
 	history := []core.Message{}
+	pipeLine := pipeline.New(poet, critic, translator)
 
 	for i := 0; i < 2; i++ {
 		fmt.Printf("Iteration running: %d\n", i)
 
-		output, err := pipeline.New(writer, critic, translator).
-			Execute(ctx, input, func(in, out core.Message, cfg *core.PipeConfig) {
-				history = append(history, in)
-				cfg.Messages = history
-			})
+		output, err := pipeLine.Execute(ctx, input, func(in, out core.Message, cfg *core.PipeConfig) {
+			history = append(history, in)
+			cfg.Messages = history
+		})
 		if err != nil {
 			panic(err)
 		}
@@ -57,9 +58,15 @@ func main() {
 		input = output.(core.TextMessage)
 	}
 
+	// HACK: on last iteration when we say "input = output" we never append that input to the history
+	// so we have to do that after the for loop
 	history = append(history, input)
 
+	// IDEA
+	// InterceptorParams{ in, out, cfg, pipes, idx }
+	// knowing len(pipes) and idx we can determine whether the iteration is last and append not only input but also output
+
 	for i, msg := range history {
-		fmt.Printf("%d: %v\n", i, msg)
+		fmt.Printf("%d: %v\n\n", i, msg)
 	}
 }
