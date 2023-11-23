@@ -14,12 +14,10 @@ type SpeechToTextParams struct {
 
 func (f Factory) SpeechToText(params SpeechToTextParams) *core.Pipe {
 	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
-		// cfg := core.NewPipeConfig(options...)
-
 		resp, err := f.client.CreateTranscription(ctx, openai.AudioRequest{
 			Model:    params.Model,
 			Prompt:   cfg.Prompt,
-			FilePath: "voice.ogg",
+			FilePath: "speech.ogg", // TODO move to cfg?
 			Reader:   bytes.NewReader(msg.Bytes()),
 		})
 		if err != nil {

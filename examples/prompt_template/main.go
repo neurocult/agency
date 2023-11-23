@@ -16,7 +16,7 @@ func main() {
 
 	resultMsg, err := factory.
 		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
-		WithPrompt(
+		SetPrompt(
 			"You are a helpful assistant that translates %s to %s",
 			"English", "French",
 		).

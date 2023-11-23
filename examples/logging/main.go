@@ -17,9 +17,9 @@ func main() {
 	params := openai.TextToTextParams{Model: "gpt-3.5-turbo"}
 
 	_, err := pipeline.New(
-		factory.TextToText(params).WithPrompt("explain what that means"),
-		factory.TextToText(params).WithPrompt("translate to russian"),
-		factory.TextToText(params).WithPrompt("replace all spaces with '_'"),
+		factory.TextToText(params).SetPrompt("explain what that means"),
+		factory.TextToText(params).SetPrompt("translate to russian"),
+		factory.TextToText(params).SetPrompt("replace all spaces with '_'"),
 	).
 		Execute(
 			context.Background(),

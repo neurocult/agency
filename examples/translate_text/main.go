@@ -17,7 +17,7 @@ func main() {
 
 	result, err := factory.
 		TextToText(openai.TextToTextParams{Model: goopenai.GPT3Dot5Turbo}).
-		WithPrompt("You are a helpful assistant that translates English to French").
+		SetPrompt("You are a helpful assistant that translates English to French").
 		Execute(context.Background(), core.NewUserMessage("I love programming."))
 
 	if err != nil {

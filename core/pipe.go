@@ -40,13 +40,12 @@ func (p *Pipe) Execute(ctx context.Context, input Message) (Message, error) {
 	return output, nil
 }
 
-// TODO rename to SetPrompt
-func (p *Pipe) WithPrompt(prompt string, args ...any) *Pipe {
+func (p *Pipe) SetPrompt(prompt string, args ...any) *Pipe {
 	p.config.Prompt = prompt
 	return p
 }
 
-func (p *Pipe) WithMessages(msgs []Message) *Pipe {
+func (p *Pipe) SetMessages(msgs []Message) *Pipe {
 	p.config.Messages = msgs
 	return p
 }

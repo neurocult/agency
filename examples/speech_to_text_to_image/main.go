@@ -1,3 +1,4 @@
+// To make this example work make sure you have speech.ogg file in the root of directory
 package main
 
 import (

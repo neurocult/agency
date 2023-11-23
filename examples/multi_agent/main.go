@@ -20,15 +20,15 @@ func main() {
 
 	poet := factory.
 		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
-		WithPrompt("You are a poet, your task is to create poems on a given topic.")
+		SetPrompt("You are a poet, your task is to create poems on a given topic.")
 
 	critic := factory.
 		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
-		WithPrompt("You are a literary critic, your task is to criticize poetry.")
+		SetPrompt("You are a literary critic, your task is to criticize poetry.")
 
 	translator := factory.
 		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
-		WithPrompt("Translate English to Russian")
+		SetPrompt("Translate English to Russian")
 
 	reader := bufio.NewReader(os.Stdin)
 

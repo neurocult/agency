@@ -29,3 +29,5 @@ go.work
 
 # generation artifacts
 example.mp3
+speech.ogg
+example.png

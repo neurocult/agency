@@ -1,3 +1,4 @@
+// To make this example work make sure you have speech.ogg file in the root of directory
 package main
 
 import (
@@ -34,7 +35,7 @@ func main() {
 			Model:       goopenai.GPT3Dot5Turbo,
 			Temperature: 0.5,
 		}).
-		WithPrompt("translate to russian")
+		SetPrompt("translate to russian")
 
 	// step 3
 	uppercase := factory.
@@ -42,7 +43,7 @@ func main() {
 			Model:       goopenai.GPT3Dot5Turbo,
 			Temperature: 1,
 		}).
-		WithPrompt("uppercase every letter of the text")
+		SetPrompt("uppercase every letter of the text")
 
 	saver := Saver{}
 
