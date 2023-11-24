@@ -4,7 +4,7 @@ Library designed for developers eager to explore the potential of Large Language
 
 **Welcome to the agency!** 🕵️‍♂️
 
-![Dracula-agent, mascot of the "agency" library.](./assets/dracula.jpeg)
+![Dracula-agent, mascot of the "agency" library.](./assets/dracula.png)
 
 ## 💻 Quick Start
 
