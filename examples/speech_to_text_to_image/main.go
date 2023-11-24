@@ -17,7 +17,7 @@ import (
 func main() {
 	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
-	data, err := os.ReadFile("speech.ogg")
+	data, err := os.ReadFile("speech.mp3")
 	if err != nil {
 		panic(err)
 	}
