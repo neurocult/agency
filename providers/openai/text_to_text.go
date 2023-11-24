@@ -12,6 +12,7 @@ import (
 type TextToTextParams struct {
 	Model       string
 	Temperature float32
+	MaxTokens   int
 }
 
 func (f Factory) TextToText(params TextToTextParams) *agency.Operation {
@@ -40,6 +41,7 @@ func (f Factory) TextToText(params TextToTextParams) *agency.Operation {
 			openai.ChatCompletionRequest{
 				Model:       params.Model,
 				Temperature: params.Temperature,
+				MaxTokens:   params.MaxTokens,
 				Messages:    openAIMessages,
 			},
 		)
@@ -50,7 +52,7 @@ func (f Factory) TextToText(params TextToTextParams) *agency.Operation {
 		if len(resp.Choices) < 1 {
 			return agency.Message{}, errors.New("no choice")
 		}
-		choice := resp.Choices[0].Message
+		choice := resp.Choices[0].Message // TODO what about other choices?
 
 		return agency.Message{
 			Role:    agency.Role(choice.Role),

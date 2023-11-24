@@ -29,6 +29,7 @@ func (f Factory) TextToImage(params TextToImageParams) *agency.Operation {
 			return agency.Message{}, err
 		}
 
+		// TODO looks like we (can?) generate multiple images (respBase64.Data is a slice)
 		imgBytes, err := base64.StdEncoding.DecodeString(respBase64.Data[0].B64JSON)
 		if err != nil {
 			return agency.Message{}, err
