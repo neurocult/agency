@@ -11,7 +11,7 @@ Library designed for developers eager to explore the potential of Large Language
 Install package:
 
 ```bash
-go get github.com/eqtlab/agency
+go get github.com/neurocult/agency
 ```
 
 Chat example:
