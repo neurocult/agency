@@ -9,8 +9,8 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	goopenai "github.com/sashabaranov/go-openai"
 
-	"github.com/eqtlab/lib/core"
-	"github.com/eqtlab/lib/openai"
+	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency/openai"
 )
 
 func main() {

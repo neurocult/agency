@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/eqtlab/lib/core"
+	"github.com/neurocult/agency/core"
 	"github.com/sashabaranov/go-openai"
 )
 

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/eqtlab/lib/core"
-	"github.com/eqtlab/lib/pipeline"
+	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency/pipeline"
 )
 
 func main() {

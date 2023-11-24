@@ -3,7 +3,7 @@ package pipeline
 import (
 	"context"
 
-	"github.com/eqtlab/lib/core"
+	"github.com/neurocult/agency/core"
 )
 
 type Pipeline struct {

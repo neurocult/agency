@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/eqtlab/lib/core"
-	"github.com/eqtlab/lib/openai"
-	"github.com/eqtlab/lib/pipeline"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency/openai"
+	"github.com/neurocult/agency/pipeline"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/graphql"
 	"github.com/weaviate/weaviate/entities/models"

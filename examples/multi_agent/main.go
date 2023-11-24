@@ -8,9 +8,9 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"github.com/eqtlab/lib/core"
-	"github.com/eqtlab/lib/openai"
-	"github.com/eqtlab/lib/pipeline"
+	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency/openai"
+	"github.com/neurocult/agency/pipeline"
 )
 
 // FIXME this example probably does not work because interceptor is executed after and not before the pipe

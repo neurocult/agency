@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/eqtlab/lib/pipeline"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/neurocult/agency/pipeline"
 	goopenai "github.com/sashabaranov/go-openai"
 
-	"github.com/eqtlab/lib/core"
-	"github.com/eqtlab/lib/openai"
+	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency/openai"
 )
 
 type Saver []core.Message

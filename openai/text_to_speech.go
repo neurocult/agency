@@ -6,7 +6,7 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 
-	"github.com/eqtlab/lib/core"
+	"github.com/neurocult/agency/core"
 )
 
 type TextToSpeechParams struct {

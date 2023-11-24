@@ -1,4 +1,4 @@
-module github.com/eqtlab/lib
+module github.com/neurocult/agency
 
 go 1.21.0
 
