@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/neurocult/agency/core"
 	"github.com/sashabaranov/go-openai"
+
+	"github.com/neurocult/agency"
 )
 
 type TextToTextParams struct {
@@ -13,8 +14,8 @@ type TextToTextParams struct {
 	Temperature float32
 }
 
-func (f Factory) TextToText(params TextToTextParams) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
+func (f Factory) TextToText(params TextToTextParams) *agency.Operation {
+	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
 
 		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
@@ -22,15 +23,10 @@ func (f Factory) TextToText(params TextToTextParams) *core.Pipe {
 			Content: cfg.Prompt,
 		})
 
-		for _, history := range cfg.Messages {
-			textMsg, ok := history.(core.TextMessage)
-			if !ok {
-				return nil, errors.New("...")
-			}
-
+		for _, textMsg := range cfg.Messages {
 			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
 				Role:    string(textMsg.Role),
-				Content: textMsg.Content,
+				Content: string(textMsg.Content),
 			})
 		}
 
@@ -48,17 +44,17 @@ func (f Factory) TextToText(params TextToTextParams) *core.Pipe {
 			},
 		)
 		if err != nil {
-			return nil, err
+			return agency.Message{}, err
 		}
 
 		if len(resp.Choices) < 1 {
-			return nil, errors.New("no choice")
+			return agency.Message{}, errors.New("no choice")
 		}
 		choice := resp.Choices[0].Message
 
-		return core.TextMessage{
-			Content: choice.Content,
-			Role:    core.Role(choice.Role),
+		return agency.Message{
+			Role:    agency.Role(choice.Role),
+			Content: []byte(choice.Content),
 		}, nil
 	})
 }

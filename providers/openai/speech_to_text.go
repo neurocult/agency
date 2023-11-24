@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 
-	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -12,21 +12,21 @@ type SpeechToTextParams struct {
 	Model string
 }
 
-func (f Factory) SpeechToText(params SpeechToTextParams) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
+func (f Factory) SpeechToText(params SpeechToTextParams) *agency.Operation {
+	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		resp, err := f.client.CreateTranscription(ctx, openai.AudioRequest{
 			Model:    params.Model,
 			Prompt:   cfg.Prompt,
 			FilePath: "speech.ogg", // TODO move to cfg?
-			Reader:   bytes.NewReader(msg.Bytes()),
+			Reader:   bytes.NewReader(msg.Content),
 		})
 		if err != nil {
-			return nil, err
+			return agency.Message{}, err
 		}
 
-		return core.TextMessage{
-			Role:    core.AssistantRole,
-			Content: resp.Text,
+		return agency.Message{
+			Role:    agency.AssistantRole,
+			Content: []byte(resp.Text),
 		}, nil
 	})
 }

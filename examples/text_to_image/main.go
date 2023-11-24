@@ -10,7 +10,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	goopenai "github.com/sashabaranov/go-openai"
 
-	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
@@ -22,7 +22,7 @@ func main() {
 		ImageSize: goopenai.CreateImageSize256x256,
 	}).Execute(
 		context.Background(),
-		core.NewUserMessage("halloween night at a haunted museum."),
+		agency.UserMessage("halloween night at a haunted museum."),
 	)
 
 	if err != nil {
@@ -36,8 +36,8 @@ func main() {
 	fmt.Println("img saved to example.png")
 }
 
-func saveToDisk(msg core.Message) error {
-	r := bytes.NewReader(msg.Bytes())
+func saveToDisk(msg agency.Message) error {
+	r := bytes.NewReader(msg.Content)
 
 	imgData, err := png.Decode(r)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
@@ -22,7 +22,7 @@ func main() {
 		).
 		Execute(
 			context.Background(),
-			core.NewUserMessage("%s").Bind("I love programming."),
+			agency.UserMessage("%s", "I love programming."),
 		)
 
 	if err != nil {

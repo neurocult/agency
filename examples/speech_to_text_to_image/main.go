@@ -10,8 +10,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	goopenai "github.com/sashabaranov/go-openai"
 
-	"github.com/neurocult/agency/core"
-	"github.com/neurocult/agency/pipeline"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
@@ -23,13 +22,13 @@ func main() {
 		panic(err)
 	}
 
-	msg, err := pipeline.New(
+	msg, err := agency.NewProcess(
 		factory.SpeechToText(openai.SpeechToTextParams{Model: goopenai.Whisper1}),
 		factory.TextToImage(openai.TextToImageParams{
 			Model:     goopenai.CreateImageModelDallE2,
 			ImageSize: goopenai.CreateImageSize256x256,
 		}),
-	).Execute(context.Background(), core.NewSpeechMessage(data))
+	).Execute(context.Background(), agency.Message{Content: data})
 	if err != nil {
 		panic(err)
 	}
@@ -39,8 +38,8 @@ func main() {
 	}
 }
 
-func saveImgToDisk(msg core.Message) error {
-	r := bytes.NewReader(msg.Bytes())
+func saveImgToDisk(msg agency.Message) error {
+	r := bytes.NewReader(msg.Content)
 
 	imgData, err := png.Decode(r)
 	if err != nil {

@@ -27,7 +27,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
@@ -37,7 +37,7 @@ func main() {
 		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
 		SetPrompt("You are helpful assistant.")
 
-	messages := []core.Message{}
+	messages := []agency.Message{}
 	reader := bufio.NewReader(os.Stdin)
 	ctx := context.Background()
 
@@ -49,7 +49,7 @@ func main() {
 			panic(err)
 		}
 
-		input := core.NewUserMessage(text)
+		input := agency.NewUserMessage(text)
 		answer, err := assistant.SetMessages(messages).Execute(ctx, input)
 		if err != nil {
 			panic(err)
@@ -99,3 +99,4 @@ In the next versions:
 - [ ] More provider-adapters, not only openai
 - [ ] Image to text pipes
 - [ ] Powerful API for autonomous agents
+- [ ] Tagging and JSON output parser

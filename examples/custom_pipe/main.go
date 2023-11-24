@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/neurocult/agency/core"
-	"github.com/neurocult/agency/pipeline"
+	"github.com/neurocult/agency"
 )
 
 func main() {
-	increment := core.NewPipe(incrementFunc)
+	increment := agency.NewOperation(incrementFunc)
 
-	msg, err := pipeline.New(
+	msg, err := agency.NewProcess(
 		increment, increment, increment,
-	).Execute(context.Background(), core.NewUserMessage("0"))
+	).Execute(context.Background(), agency.UserMessage("0"))
 
 	if err != nil {
 		panic(err)
@@ -23,11 +22,11 @@ func main() {
 	fmt.Println(msg)
 }
 
-func incrementFunc(ctx context.Context, msg core.Message, _ *core.PipeConfig) (core.Message, error) {
-	i, err := strconv.ParseInt(string(msg.Bytes()), 10, 10)
+func incrementFunc(ctx context.Context, msg agency.Message, _ *agency.OperationConfig) (agency.Message, error) {
+	i, err := strconv.ParseInt(string(msg.Content), 10, 10)
 	if err != nil {
-		return nil, err
+		return agency.Message{}, err
 	}
 	inc := strconv.Itoa(int(i) + 1)
-	return core.NewSystemMessage(inc), nil
+	return agency.SystemMessage(inc), nil
 }

@@ -7,16 +7,15 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/neurocult/agency/pipeline"
 	goopenai "github.com/sashabaranov/go-openai"
 
-	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
-type Saver []core.Message
+type Saver []agency.Message
 
-func (s *Saver) Save(input, output core.Message, _ *core.PipeConfig) {
+func (s *Saver) Save(input, output agency.Message, _ *agency.OperationConfig) {
 	*s = append(*s, output)
 }
 
@@ -47,15 +46,15 @@ func main() {
 
 	saver := Saver{}
 
-	sound, err := os.ReadFile("speech.ogg")
+	sound, err := os.ReadFile("speech.mp3")
 	if err != nil {
 		panic(err)
 	}
 
 	ctx := context.Background()
-	speechMsg := core.NewSpeechMessage(sound)
+	speechMsg := agency.Message{Content: sound}
 
-	_, err = pipeline.New(
+	_, err = agency.NewProcess(
 		hear,
 		translate,
 		uppercase,

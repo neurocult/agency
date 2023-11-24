@@ -6,8 +6,7 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/neurocult/agency/core"
-	"github.com/neurocult/agency/pipeline"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/graphql"
@@ -32,11 +31,11 @@ func main() {
 		Model: "tts-1", ResponseFormat: "mp3", Speed: 1, Voice: "onyx",
 	})
 
-	result, err := pipeline.New(
+	result, err := agency.NewProcess(
 		retrieve,
 		summarize,
 		voice,
-	).Execute(ctx, core.NewUserMessage("programming"))
+	).Execute(ctx, agency.UserMessage("programming"))
 	if err != nil {
 		panic(err)
 	}
@@ -47,8 +46,8 @@ func main() {
 }
 
 // RAGPipe retrieves relevant objects from vector store and builds a text message to pass further to the pipeline
-func RAGPipe(client *weaviate.Client) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, po *core.PipeConfig) (core.Message, error) {
+func RAGPipe(client *weaviate.Client) *agency.Operation {
+	return agency.NewOperation(func(ctx context.Context, msg agency.Message, po *agency.OperationConfig) (agency.Message, error) {
 		input := msg.String()
 
 		result, err := client.GraphQL().Get().
@@ -71,14 +70,14 @@ func RAGPipe(client *weaviate.Client) *core.Pipe {
 		for _, obj := range result.Data {
 			bb, err := json.Marshal(&obj)
 			if err != nil {
-				return nil, err
+				return agency.Message{}, err
 			}
 			content += string(bb)
 		}
 
-		return core.TextMessage{
-			Role:    core.AssistantRole,
-			Content: content,
+		return agency.Message{
+			Role:    agency.AssistantRole,
+			Content: []byte(content),
 		}, nil
 	})
 }
@@ -118,14 +117,14 @@ func prepareDB(openAPIKey string, ctx context.Context) (*weaviate.Client, error)
 	return client, nil
 }
 
-func saveToDisk(msg core.Message) error {
-	file, err := os.Create("example.mp3")
+func saveToDisk(msg agency.Message) error {
+	file, err := os.Create("speech.mp3")
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	_, err = file.Write(msg.Bytes())
+	_, err = file.Write(msg.Content)
 	if err != nil {
 		return err
 	}

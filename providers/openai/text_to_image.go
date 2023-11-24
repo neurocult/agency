@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -14,10 +14,10 @@ type TextToImageParams struct {
 	ImageSize string
 }
 
-func (f Factory) TextToImage(params TextToImageParams) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
+func (f Factory) TextToImage(params TextToImageParams) *agency.Operation {
+	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		reqBase64 := openai.ImageRequest{
-			Prompt:         fmt.Sprintf("%s\n\n%s", cfg.Prompt, string(msg.Bytes())),
+			Prompt:         fmt.Sprintf("%s\n\n%s", cfg.Prompt, string(msg.Content)),
 			Size:           params.ImageSize,
 			ResponseFormat: openai.CreateImageResponseFormatB64JSON,
 			N:              1,
@@ -26,14 +26,17 @@ func (f Factory) TextToImage(params TextToImageParams) *core.Pipe {
 
 		respBase64, err := f.client.CreateImage(ctx, reqBase64)
 		if err != nil {
-			return nil, err
+			return agency.Message{}, err
 		}
 
 		imgBytes, err := base64.StdEncoding.DecodeString(respBase64.Data[0].B64JSON)
 		if err != nil {
-			return nil, err
+			return agency.Message{}, err
 		}
 
-		return core.NewImageMessage(imgBytes), nil
+		return agency.Message{
+			Role:    agency.AssistantRole,
+			Content: imgBytes,
+		}, nil
 	})
 }

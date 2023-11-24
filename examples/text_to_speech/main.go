@@ -6,12 +6,12 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"github.com/neurocult/agency/core"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
 func main() {
-	input := core.NewUserMessage(`
+	input := agency.UserMessage(`
 		One does not simply walk into Mordor.
 		Its black gates are guarded by more than just Orcs.
 		There is evil there that does not sleep, and the Great Eye is ever watchful.
@@ -35,14 +35,14 @@ func main() {
 	}
 }
 
-func saveToDisk(msg core.Message) error {
-	file, err := os.Create("example.mp3")
+func saveToDisk(msg agency.Message) error {
+	file, err := os.Create("speech.mp3")
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	_, err = file.Write(msg.Bytes())
+	_, err = file.Write(msg.Content)
 	if err != nil {
 		return err
 	}

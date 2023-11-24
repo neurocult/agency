@@ -7,8 +7,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"github.com/neurocult/agency/core"
-	"github.com/neurocult/agency/pipeline"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
@@ -16,14 +15,14 @@ func main() {
 	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 	params := openai.TextToTextParams{Model: "gpt-3.5-turbo"}
 
-	_, err := pipeline.New(
+	_, err := agency.NewProcess(
 		factory.TextToText(params).SetPrompt("explain what that means"),
 		factory.TextToText(params).SetPrompt("translate to russian"),
 		factory.TextToText(params).SetPrompt("replace all spaces with '_'"),
 	).
 		Execute(
 			context.Background(),
-			core.NewUserMessage("Kazakhstan alga!"),
+			agency.UserMessage("Kazakhstan alga!"),
 			Logger,
 		)
 
@@ -32,6 +31,6 @@ func main() {
 	}
 }
 
-func Logger(input, output core.Message, cfg *core.PipeConfig) {
+func Logger(input, output agency.Message, cfg *agency.OperationConfig) {
 	fmt.Printf("in: %v\nprompt: %v\nout: %v\n\n", input, cfg.Prompt, output)
 }

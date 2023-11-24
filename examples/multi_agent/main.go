@@ -8,8 +8,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
-	"github.com/neurocult/agency/core"
-	"github.com/neurocult/agency/pipeline"
+	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
@@ -40,14 +39,14 @@ func main() {
 	fmt.Println("Thank you! Starting the loop...")
 
 	ctx := context.Background()
-	input := core.NewUserMessage(text)
-	history := []core.Message{}
-	pipeLine := pipeline.New(poet, critic, translator)
+	input := agency.UserMessage(text)
+	history := []agency.Message{}
+	pipeLine := agency.NewProcess(poet, critic, translator)
 
 	for i := 0; i < 2; i++ {
 		fmt.Printf("Iteration running: %d\n", i)
 
-		output, err := pipeLine.Execute(ctx, input, func(in, out core.Message, cfg *core.PipeConfig) {
+		output, err := pipeLine.Execute(ctx, input, func(in, out agency.Message, cfg *agency.OperationConfig) {
 			history = append(history, in)
 			cfg.Messages = history
 		})
@@ -55,7 +54,7 @@ func main() {
 			panic(err)
 		}
 
-		input = output.(core.TextMessage)
+		input = output
 	}
 
 	// HACK: on last iteration when we say "input = output" we never append that input to the history

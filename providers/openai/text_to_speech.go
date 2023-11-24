@@ -4,9 +4,8 @@ import (
 	"context"
 	"io"
 
+	"github.com/neurocult/agency"
 	"github.com/sashabaranov/go-openai"
-
-	"github.com/neurocult/agency/core"
 )
 
 type TextToSpeechParams struct {
@@ -16,8 +15,8 @@ type TextToSpeechParams struct {
 	Voice          string
 }
 
-func (f Factory) TextToSpeech(params TextToSpeechParams) *core.Pipe {
-	return core.NewPipe(func(ctx context.Context, msg core.Message, cfg *core.PipeConfig) (core.Message, error) {
+func (f Factory) TextToSpeech(params TextToSpeechParams) *agency.Operation {
+	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		resp, err := f.client.CreateSpeech(ctx, openai.CreateSpeechRequest{
 			Model:          openai.SpeechModel(params.Model),
 			Input:          msg.String(),
@@ -26,14 +25,17 @@ func (f Factory) TextToSpeech(params TextToSpeechParams) *core.Pipe {
 			Speed:          params.Speed,
 		})
 		if err != nil {
-			return nil, err
+			return agency.Message{}, err
 		}
 
 		bb, err := io.ReadAll(resp)
 		if err != nil {
-			return nil, err
+			return agency.Message{}, err
 		}
 
-		return core.NewSpeechMessage(bb), nil
+		return agency.Message{
+			Role:    agency.AssistantRole,
+			Content: bb,
+		}, nil
 	})
 }
