@@ -11,7 +11,7 @@ import (
 	goopenai "github.com/sashabaranov/go-openai"
 
 	"github.com/neurocult/agency/core"
-	"github.com/neurocult/agency/openai"
+	"github.com/neurocult/agency/providers/openai"
 )
 
 type Saver []core.Message

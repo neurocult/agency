@@ -11,8 +11,8 @@ import (
 	goopenai "github.com/sashabaranov/go-openai"
 
 	"github.com/neurocult/agency/core"
-	"github.com/neurocult/agency/openai"
 	"github.com/neurocult/agency/pipeline"
+	"github.com/neurocult/agency/providers/openai"
 )
 
 func main() {

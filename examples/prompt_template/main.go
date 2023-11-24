@@ -8,7 +8,7 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/neurocult/agency/core"
-	"github.com/neurocult/agency/openai"
+	"github.com/neurocult/agency/providers/openai"
 )
 
 func main() {
