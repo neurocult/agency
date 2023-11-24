@@ -49,7 +49,7 @@ func main() {
 			panic(err)
 		}
 
-		input := agency.NewUserMessage(text)
+		input := agency.UserMessage(text)
 		answer, err := assistant.SetMessages(messages).Execute(ctx, input)
 		if err != nil {
 			panic(err)
@@ -64,7 +64,7 @@ func main() {
 
 That's it!
 
-See [examples](./examples/) to find out more complex usecases including RAGs and multimodal pipelines.
+See [examples](./examples/) to find out more complex usecases including RAGs and multimodal operations.
 
 ## 🚀 Features
 
@@ -72,9 +72,9 @@ See [examples](./examples/) to find out more complex usecases including RAGs and
 
 ✨ Write **clean code** and follow **clean architecture** by separating business logic from concrete implementations
 
-✨ Easily create **custom pipes** by implementing simple interface
+✨ Easily create **custom operations** by implementing simple interface
 
-✨ **Compose pipes** together into **pipelines** with the ability to observe each step via **interceptors**
+✨ **Compose operations** together into **processes** with the ability to observe each step via **interceptors**
 
 ✨ **OpenAI API bindings** (can be used for any openai-compatable API: text to text (completion), text to image, text to speech, speech to text
 
@@ -97,6 +97,6 @@ In the next versions:
 - [ ] Support for external function calls
 - [ ] Metadata (tokens used, audio duration, etc)
 - [ ] More provider-adapters, not only openai
-- [ ] Image to text pipes
+- [ ] Image to text operations
 - [ ] Powerful API for autonomous agents
 - [ ] Tagging and JSON output parser

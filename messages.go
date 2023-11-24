@@ -7,7 +7,6 @@ type Message struct {
 	Content []byte
 }
 
-// TODO check if we need this
 func (m Message) String() string {
 	return string(m.Content)
 }

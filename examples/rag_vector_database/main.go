@@ -25,7 +25,7 @@ func main() {
 	}
 
 	factory := openai.New(openai.Params{Key: openAPIKey})
-	retrieve := RAGPipe(client)
+	retrieve := RAGoperation(client)
 	summarize := factory.TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).SetPrompt("summarize")
 	voice := factory.TextToSpeech(openai.TextToSpeechParams{
 		Model: "tts-1", ResponseFormat: "mp3", Speed: 1, Voice: "onyx",
@@ -45,8 +45,8 @@ func main() {
 	}
 }
 
-// RAGPipe retrieves relevant objects from vector store and builds a text message to pass further to the pipeline
-func RAGPipe(client *weaviate.Client) *agency.Operation {
+// RAGoperation retrieves relevant objects from vector store and builds a text message to pass further to the process
+func RAGoperation(client *weaviate.Client) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, po *agency.OperationConfig) (agency.Message, error) {
 		input := msg.String()
 
