@@ -32,3 +32,6 @@ example.mp3
 speech.ogg
 example.png
 speech.mp3
+
+# mac os
+.DS_Store

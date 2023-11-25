@@ -15,7 +15,7 @@ type TextToSpeechParams struct {
 	Voice          string
 }
 
-func (f Factory) TextToSpeech(params TextToSpeechParams) *agency.Operation {
+func (f Provider) TextToSpeech(params TextToSpeechParams) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		resp, err := f.client.CreateSpeech(ctx, openai.CreateSpeechRequest{
 			Model:          openai.SpeechModel(params.Model),

@@ -4,7 +4,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-type Factory struct {
+type Provider struct {
 	client *openai.Client
 }
 
@@ -13,12 +13,12 @@ type Params struct {
 	BaseURL string // Optional. If not set then default openai base url is used
 }
 
-func New(params Params) *Factory {
+func New(params Params) *Provider {
 	cfg := openai.DefaultConfig(params.Key)
 	if params.BaseURL != "" {
 		cfg.BaseURL = params.BaseURL
 	}
-	return &Factory{
+	return &Provider{
 		client: openai.NewClientWithConfig(cfg),
 	}
 }

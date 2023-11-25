@@ -5,23 +5,25 @@ import (
 	"fmt"
 )
 
-type OperationHandler func(context.Context, Message, *OperationConfig) (Message, error)
-
 // Operation is basic building block.
 type Operation struct {
 	handler OperationHandler
 	config  *OperationConfig
 }
 
-func (p *Operation) Config() *OperationConfig {
-	return p.config
-}
+// OperationHandler is a function that implements logic.
+// It could be thought of as an interface that providers must implement.
+type OperationHandler func(context.Context, Message, *OperationConfig) (Message, error)
 
 // OperationConfig represents abstract operation configuration.
 // It contains fields for all possible modalities but nothing specific to concrete model implementations.
 type OperationConfig struct {
 	Prompt   string
 	Messages []Message
+}
+
+func (p *Operation) Config() *OperationConfig {
+	return p.config
 }
 
 // NewOperation allows to create an operation from a function.

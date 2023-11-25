@@ -14,7 +14,7 @@ type ImageToTextParams struct {
 	MaxTokens int
 }
 
-func (f *Factory) ImageToText(params ImageToTextParams) *agency.Operation {
+func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		openaiMsg := openai.ChatCompletionMessage{
 			Role:         openai.ChatMessageRoleUser,

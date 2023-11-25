@@ -14,7 +14,7 @@ type TextToImageParams struct {
 	ImageSize string
 }
 
-func (f Factory) TextToImage(params TextToImageParams) *agency.Operation {
+func (f Provider) TextToImage(params TextToImageParams) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		reqBase64 := openai.ImageRequest{
 			Prompt:         fmt.Sprintf("%s\n\n%s", cfg.Prompt, string(msg.Content)),

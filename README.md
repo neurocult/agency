@@ -1,4 +1,4 @@
-# Agency: The Go Way to AI Pipelines
+# Agency: The Go Way to AI
 
 Library designed for developers eager to explore the potential of Large Language Models (LLMs) and other generative AI through a clean, effective, and Go-idiomatic approach.
 
@@ -89,6 +89,10 @@ At the heart of Agency is the ambition to empower users to build autonomous agen
 In the generative AI landscape, Go-based libraries are rare. The most notable is [LangChainGo](https://github.com/tmc/langchaingo), a Go port of the Python LangChain. However, translating Python to Go can be clunky and may not fit well with Go's idiomatic style. Plus, some question LangChain's design, even in Python. This situation reveals a clear need for an idiomatic Go alternative.
 
 Our goal is to fill this gap with a Go-centric library that emphasizes clean, simple code and avoids unnecessary complexities. Agency is designed with a small, robust core, easy to extend and perfectly suited to Go's strengths in static typing and performance. It's our answer to the lack of Go-native solutions in generative AI.
+
+## Tutorial
+
+- [Part 1](https://dev.to/emil14/agency-the-go-way-to-ai-part-1-1lhe)
 
 ## 🛣 Roadmap
 

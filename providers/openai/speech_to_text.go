@@ -12,7 +12,7 @@ type SpeechToTextParams struct {
 	Model string
 }
 
-func (f Factory) SpeechToText(params SpeechToTextParams) *agency.Operation {
+func (f Provider) SpeechToText(params SpeechToTextParams) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		resp, err := f.client.CreateTranscription(ctx, openai.AudioRequest{
 			Model:    params.Model,

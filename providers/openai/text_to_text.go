@@ -15,7 +15,7 @@ type TextToTextParams struct {
 	MaxTokens   int
 }
 
-func (f Factory) TextToText(params TextToTextParams) *agency.Operation {
+func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
 
@@ -36,7 +36,7 @@ func (f Factory) TextToText(params TextToTextParams) *agency.Operation {
 			Content: msg.String(),
 		})
 
-		resp, err := f.client.CreateChatCompletion(
+		resp, err := p.client.CreateChatCompletion(
 			ctx,
 			openai.ChatCompletionRequest{
 				Model:       params.Model,
