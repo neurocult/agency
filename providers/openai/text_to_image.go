@@ -14,7 +14,7 @@ type TextToImageParams struct {
 	ImageSize string
 }
 
-func (f Provider) TextToImage(params TextToImageParams) *agency.Operation {
+func (p Provider) TextToImage(params TextToImageParams) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		reqBase64 := openai.ImageRequest{
 			Prompt:         fmt.Sprintf("%s\n\n%s", cfg.Prompt, string(msg.Content)),
@@ -24,12 +24,11 @@ func (f Provider) TextToImage(params TextToImageParams) *agency.Operation {
 			Model:          params.Model,
 		}
 
-		respBase64, err := f.client.CreateImage(ctx, reqBase64)
+		respBase64, err := p.client.CreateImage(ctx, reqBase64)
 		if err != nil {
 			return agency.Message{}, err
 		}
 
-		// TODO looks like we (can?) generate multiple images (respBase64.Data is a slice)
 		imgBytes, err := base64.StdEncoding.DecodeString(respBase64.Data[0].B64JSON)
 		if err != nil {
 			return agency.Message{}, err

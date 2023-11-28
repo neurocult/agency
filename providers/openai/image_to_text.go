@@ -11,7 +11,8 @@ import (
 )
 
 type ImageToTextParams struct {
-	MaxTokens int
+	Temperature NullableFloat32
+	MaxTokens   int
 }
 
 func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
@@ -39,9 +40,10 @@ func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
 		)
 
 		resp, err := f.client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-			MaxTokens: params.MaxTokens,
-			Model:     openai.GPT4VisionPreview,
-			Messages:  []openai.ChatCompletionMessage{openaiMsg},
+			MaxTokens:   params.MaxTokens,
+			Model:       openai.GPT4VisionPreview,
+			Messages:    []openai.ChatCompletionMessage{openaiMsg},
+			Temperature: getTemperature(params.Temperature),
 		})
 		if err != nil {
 			return agency.Message{}, err
