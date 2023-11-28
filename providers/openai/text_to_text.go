@@ -11,7 +11,7 @@ import (
 
 type TextToTextParams struct {
 	Model       string
-	Temperature float32
+	Temperature NullableFloat32
 	MaxTokens   int
 }
 
@@ -40,7 +40,7 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 			ctx,
 			openai.ChatCompletionRequest{
 				Model:       params.Model,
-				Temperature: params.Temperature,
+				Temperature: getTemperature(params.Temperature),
 				MaxTokens:   params.MaxTokens,
 				Messages:    openAIMessages,
 			},

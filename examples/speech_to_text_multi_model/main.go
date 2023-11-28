@@ -32,7 +32,7 @@ func main() {
 	translate := factory.
 		TextToText(openai.TextToTextParams{
 			Model:       goopenai.GPT3Dot5Turbo,
-			Temperature: 0.5,
+			Temperature: openai.Temperature(0.5),
 		}).
 		SetPrompt("translate to russian")
 
@@ -40,7 +40,7 @@ func main() {
 	uppercase := factory.
 		TextToText(openai.TextToTextParams{
 			Model:       goopenai.GPT3Dot5Turbo,
-			Temperature: 1,
+			Temperature: openai.Temperature(1),
 		}).
 		SetPrompt("uppercase every letter of the text")
 

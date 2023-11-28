@@ -8,11 +8,7 @@ require (
 	github.com/weaviate/weaviate-go-client/v4 v4.11.0
 )
 
-require google.golang.org/genproto v0.0.0-20231120223509-83a465c0220f // indirect
-
 require (
-	github.com/PuerkitoBio/purell v1.2.1 // indirect
-	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/go-openapi/analysis v0.21.4 // indirect
 	github.com/go-openapi/errors v0.20.4 // indirect
