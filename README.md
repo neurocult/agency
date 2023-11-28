@@ -92,7 +92,7 @@ Our goal is to fill this gap with a Go-centric library that emphasizes clean, si
 
 ## Tutorial
 
-- [Part 1](https://dev.to/emil14/agency-the-go-way-to-ai-part-1-1lhe)
+- [Part 1](https://dev.to/emil14/agency-the-go-way-to-ai-part-1-1lhe) ([Russian translation](https://habr.com/ru/sandbox/204508/))
 
 ## 🛣 Roadmap
 
