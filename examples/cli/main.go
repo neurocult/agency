@@ -27,7 +27,7 @@ func main() {
 	args := flag.Args()
 	if len(args) < 1 {
 		fmt.Println("content argument is required")
-		return
+		os.Exit(1)
 	}
 	content := args[0]
 
@@ -42,7 +42,7 @@ func main() {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	fmt.Println(result)
