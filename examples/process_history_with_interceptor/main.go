@@ -15,21 +15,23 @@ import (
 
 type Saver []agency.Message
 
-func (s *Saver) Save(input, output agency.Message, _ *agency.OperationConfig) {
+// This is how we can retrieve process history by hand with the interceptor, without using the history itself.
+// But we can't (or it's hard to do) pass history between steps this way. For that we can use config func.
+func (s *Saver) Save(input, output agency.Message, _ *agency.OperationConfig, _ uint) {
 	*s = append(*s, output)
 }
 
 func main() {
-	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
+	provider := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	// step 1
-	hear := factory.
+	hear := provider.
 		SpeechToText(openai.SpeechToTextParams{
 			Model: goopenai.Whisper1,
 		})
 
 	// step2
-	translate := factory.
+	translate := provider.
 		TextToText(openai.TextToTextParams{
 			Model:       "gpt-3.5-turbo",
 			Temperature: openai.Temperature(0.5),
@@ -37,7 +39,7 @@ func main() {
 		SetPrompt("translate to russian")
 
 	// step 3
-	uppercase := factory.
+	uppercase := provider.
 		TextToText(openai.TextToTextParams{
 			Model:       "gpt-3.5-turbo",
 			Temperature: openai.Temperature(1),
@@ -54,7 +56,7 @@ func main() {
 	ctx := context.Background()
 	speechMsg := agency.Message{Content: sound}
 
-	_, err = agency.NewProcess(
+	_, err = agency.ProcessFromOperations(
 		hear,
 		translate,
 		uppercase,

@@ -22,10 +22,6 @@ type OperationConfig struct {
 	Messages []Message
 }
 
-func (p *Operation) Config() *OperationConfig {
-	return p.config
-}
-
 // NewOperation allows to create an operation from a function.
 func NewOperation(handler OperationHandler) *Operation {
 	return &Operation{

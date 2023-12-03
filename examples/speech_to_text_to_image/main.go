@@ -22,7 +22,7 @@ func main() {
 		panic(err)
 	}
 
-	msg, err := agency.NewProcess(
+	msg, err := agency.ProcessFromOperations(
 		factory.SpeechToText(openai.SpeechToTextParams{Model: goopenai.Whisper1}),
 		factory.TextToImage(openai.TextToImageParams{
 			Model:     goopenai.CreateImageModelDallE2,

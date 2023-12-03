@@ -15,7 +15,7 @@ func main() {
 	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 	params := openai.TextToTextParams{Model: "gpt-3.5-turbo"}
 
-	_, err := agency.NewProcess(
+	_, err := agency.ProcessFromOperations(
 		factory.TextToText(params).SetPrompt("explain what that means"),
 		factory.TextToText(params).SetPrompt("translate to russian"),
 		factory.TextToText(params).SetPrompt("replace all spaces with '_'"),
@@ -31,6 +31,6 @@ func main() {
 	}
 }
 
-func Logger(input, output agency.Message, cfg *agency.OperationConfig) {
+func Logger(input, output agency.Message, cfg *agency.OperationConfig, _ uint) {
 	fmt.Printf("in: %v\nprompt: %v\nout: %v\n\n", input, cfg.Prompt, output)
 }

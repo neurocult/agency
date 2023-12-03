@@ -15,14 +15,14 @@ import (
 )
 
 func main() {
-	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
+	provider := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	data, err := os.ReadFile("speech.mp3")
 	if err != nil {
 		panic(err)
 	}
 
-	result, err := factory.SpeechToText(openai.SpeechToTextParams{
+	result, err := provider.SpeechToText(openai.SpeechToTextParams{
 		Model: goopenai.Whisper1,
 	}).Execute(
 		context.Background(),
