@@ -12,6 +12,8 @@ import (
 type TextToImageParams struct {
 	Model     string
 	ImageSize string
+	Quality   string
+	Style     string
 }
 
 func (p Provider) TextToImage(params TextToImageParams) *agency.Operation {
@@ -20,8 +22,10 @@ func (p Provider) TextToImage(params TextToImageParams) *agency.Operation {
 			Prompt:         fmt.Sprintf("%s\n\n%s", cfg.Prompt, string(msg.Content)),
 			Size:           params.ImageSize,
 			ResponseFormat: openai.CreateImageResponseFormatB64JSON,
-			N:              1,
+			N:              1, // DALL·E-3 only support n=1, for other models support needed
 			Model:          params.Model,
+			Quality:        params.Quality,
+			Style:          params.Style,
 		}
 
 		respBase64, err := p.client.CreateImage(ctx, reqBase64)
