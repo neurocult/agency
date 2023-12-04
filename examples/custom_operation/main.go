@@ -11,7 +11,7 @@ import (
 func main() {
 	increment := agency.NewOperation(incrementFunc)
 
-	msg, err := agency.NewProcess(
+	msg, _, err := agency.ProcessFromOperations(
 		increment, increment, increment,
 	).Execute(context.Background(), agency.UserMessage("0"))
 

@@ -7,8 +7,8 @@ import (
 
 // Operation is basic building block.
 type Operation struct {
-	handler OperationHandler
-	config  *OperationConfig
+	handler OperationHandler // handler must never be nil
+	config  *OperationConfig // config is a pointer because it must be possible to modify it, but it must never be nil
 }
 
 // OperationHandler is a function that implements logic.
@@ -20,10 +20,6 @@ type OperationHandler func(context.Context, Message, *OperationConfig) (Message,
 type OperationConfig struct {
 	Prompt   string
 	Messages []Message
-}
-
-func (p *Operation) Config() *OperationConfig {
-	return p.config
 }
 
 // NewOperation allows to create an operation from a function.

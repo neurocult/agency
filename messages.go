@@ -3,7 +3,7 @@ package agency
 import "fmt"
 
 type Message struct {
-	Role    Role
+	Role    Role // TODO refine the model. Role only has something to do with the chat
 	Content []byte
 }
 

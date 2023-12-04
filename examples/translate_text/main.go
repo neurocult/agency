@@ -13,9 +13,9 @@ import (
 )
 
 func main() {
-	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
+	provider := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
-	result, err := factory.
+	result, err := provider.
 		TextToText(openai.TextToTextParams{Model: goopenai.GPT3Dot5Turbo}).
 		SetPrompt("You are a helpful assistant that translates English to French").
 		Execute(context.Background(), agency.UserMessage("I love programming."))

@@ -32,7 +32,7 @@ func main() {
 		Model: "tts-1", ResponseFormat: "mp3", Speed: 1, Voice: "onyx",
 	})
 
-	result, err := agency.NewProcess(
+	result, _, err := agency.ProcessFromOperations(
 		retrieve,
 		summarize,
 		voice,

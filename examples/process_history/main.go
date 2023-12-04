@@ -13,23 +13,17 @@ import (
 	"github.com/neurocult/agency/providers/openai"
 )
 
-type Saver []agency.Message
-
-func (s *Saver) Save(input, output agency.Message, _ *agency.OperationConfig) {
-	*s = append(*s, output)
-}
-
 func main() {
-	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
+	provider := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	// step 1
-	hear := factory.
+	hear := provider.
 		SpeechToText(openai.SpeechToTextParams{
 			Model: goopenai.Whisper1,
 		})
 
 	// step2
-	translate := factory.
+	translate := provider.
 		TextToText(openai.TextToTextParams{
 			Model:       "gpt-3.5-turbo",
 			Temperature: openai.Temperature(0.5),
@@ -37,14 +31,12 @@ func main() {
 		SetPrompt("translate to russian")
 
 	// step 3
-	uppercase := factory.
+	uppercase := provider.
 		TextToText(openai.TextToTextParams{
 			Model:       "gpt-3.5-turbo",
 			Temperature: openai.Temperature(1),
 		}).
 		SetPrompt("uppercase every letter of the text")
-
-	saver := Saver{}
 
 	sound, err := os.ReadFile("speech.mp3")
 	if err != nil {
@@ -54,16 +46,16 @@ func main() {
 	ctx := context.Background()
 	speechMsg := agency.Message{Content: sound}
 
-	_, err = agency.NewProcess(
+	_, history, err := agency.ProcessFromOperations(
 		hear,
 		translate,
 		uppercase,
-	).Execute(ctx, speechMsg, saver.Save)
+	).Execute(ctx, speechMsg)
 	if err != nil {
 		panic(err)
 	}
 
-	for _, msg := range saver {
+	for _, msg := range history.All() {
 		fmt.Println(msg.String())
 	}
 }
