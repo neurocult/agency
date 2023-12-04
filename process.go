@@ -37,7 +37,8 @@ func ProcessFromOperations(operations ...*Operation) *Process {
 }
 
 // ProcessInterceptor is a function that is called by Process after one step finished but before next one is started.
-type ProcessInterceptor func(in Message, out Message, cfg *OperationConfig, stepIndex uint)
+// Note that there's no way to modify these arguments because they relates to an operation that is already executed.
+type ProcessInterceptor func(in Message, out Message, cfg OperationConfig, stepIndex uint)
 
 // ProcessHistory stores results of the previous steps of the process. It's a process's execution context.
 type ProcessHistory interface {
@@ -64,30 +65,29 @@ func (p processHistory) All() []Message {
 
 // Execute loops over process steps and sequentially executes them by passing output of one step as an input to another.
 // If interceptors are provided, they are called on each step. So for N steps and M interceptors there's N x M executions.
-func (p *Process) Execute(ctx context.Context, input Message, interceptors ...ProcessInterceptor) (Message, error) {
+func (p *Process) Execute(ctx context.Context, input Message, interceptors ...ProcessInterceptor) (Message, ProcessHistory, error) {
 	history := make(processHistory, 0, len(p.steps))
 
 	for i, step := range p.steps {
 		if step.ConfigFunc != nil {
 			if err := step.ConfigFunc(history, step.Operation.config); err != nil {
-				return Message{}, fmt.Errorf("config func on step %d: %w", i, err)
+				return Message{}, nil, fmt.Errorf("config func on step %d: %w", i, err)
 			}
 		}
 
 		output, err := step.Operation.Execute(ctx, input)
 		if err != nil {
-			return Message{}, err
+			return Message{}, nil, fmt.Errorf("operation execute: %w", err)
 		}
 
 		history = append(history, output)
 
-		// FIXME while these are called AFTER operation and not before it's impossible to modify configuration
 		for _, interceptor := range interceptors {
-			interceptor(input, output, step.Operation.config, uint(i))
+			interceptor(input, output, *step.Operation.config, uint(i))
 		}
 
 		input = output
 	}
 
-	return input, nil
+	return input, history, nil
 }
