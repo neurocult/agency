@@ -36,9 +36,9 @@ func ProcessFromOperations(operations ...*Operation) *Process {
 	return &Process{steps: steps}
 }
 
-// ProcessInterceptor is a function that is called by Process after one step finished but before next one is started.
+// ProcessObserver is a function that is called by Process after one step finished but before next one is started.
 // Note that there's no way to modify these arguments because they relates to an operation that is already executed.
-type ProcessInterceptor func(in Message, out Message, cfg OperationConfig, stepIndex uint)
+type ProcessObserver func(in Message, out Message, cfg OperationConfig, stepIndex uint)
 
 // ProcessHistory stores results of the previous steps of the process. It's a process's execution context.
 type ProcessHistory interface {
@@ -65,7 +65,7 @@ func (p processHistory) All() []Message {
 
 // Execute loops over process steps and sequentially executes them by passing output of one step as an input to another.
 // If interceptors are provided, they are called on each step. So for N steps and M interceptors there's N x M executions.
-func (p *Process) Execute(ctx context.Context, input Message, interceptors ...ProcessInterceptor) (Message, ProcessHistory, error) {
+func (p *Process) Execute(ctx context.Context, input Message, observers ...ProcessObserver) (Message, ProcessHistory, error) {
 	history := make(processHistory, 0, len(p.steps))
 
 	for i, step := range p.steps {
@@ -80,9 +80,9 @@ func (p *Process) Execute(ctx context.Context, input Message, interceptors ...Pr
 			return Message{}, nil, fmt.Errorf("operation execute: %w", err)
 		}
 
-		history = append(history, output)
+		history = append(history, output) // TODO we miss the original input
 
-		for _, interceptor := range interceptors {
+		for _, interceptor := range observers {
 			interceptor(input, output, *step.Operation.config, uint(i))
 		}
 
