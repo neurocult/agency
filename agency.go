@@ -11,12 +11,11 @@ type Operation struct {
 	config  *OperationConfig
 }
 
-// OperationHandler is a function that implements logic.
+// OperationHandler is a function that implements operation's logic.
 // It could be thought of as an interface that providers must implement.
 type OperationHandler func(context.Context, Message, *OperationConfig) (Message, error)
 
-// OperationConfig represents abstract operation configuration.
-// It contains fields for all possible modalities but nothing specific to concrete model implementations.
+// OperationConfig represents abstract operation configuration for all possible models.
 type OperationConfig struct {
 	Prompt   string
 	Messages []Message

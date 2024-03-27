@@ -9,54 +9,58 @@ import (
 	"github.com/neurocult/agency"
 )
 
+// TextToTextParams represents parameters that are specific for this operation.
 type TextToTextParams struct {
 	Model       string
 	Temperature NullableFloat32
 	MaxTokens   int
 }
 
+// TextToText is an operation builder that creates operation than can convert text to text.
 func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
-	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
-		openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
+	return agency.NewOperation(
+		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
+			openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
 
-		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: cfg.Prompt,
-		})
-
-		for _, textMsg := range cfg.Messages {
 			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    string(textMsg.Role),
-				Content: string(textMsg.Content),
+				Role:    openai.ChatMessageRoleSystem,
+				Content: cfg.Prompt,
 			})
-		}
 
-		openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
-			Content: msg.String(),
-		})
+			for _, textMsg := range cfg.Messages {
+				openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+					Role:    string(textMsg.Role),
+					Content: string(textMsg.Content),
+				})
+			}
 
-		resp, err := p.client.CreateChatCompletion(
-			ctx,
-			openai.ChatCompletionRequest{
-				Model:       params.Model,
-				Temperature: getTemperature(params.Temperature),
-				MaxTokens:   params.MaxTokens,
-				Messages:    openAIMessages,
-			},
-		)
-		if err != nil {
-			return agency.Message{}, err
-		}
+			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: msg.String(),
+			})
 
-		if len(resp.Choices) < 1 {
-			return agency.Message{}, errors.New("no choice")
-		}
-		choice := resp.Choices[0].Message // TODO what about other choices?
+			resp, err := p.client.CreateChatCompletion(
+				ctx,
+				openai.ChatCompletionRequest{
+					Model:       params.Model,
+					Temperature: getTemperature(params.Temperature),
+					MaxTokens:   params.MaxTokens,
+					Messages:    openAIMessages,
+				},
+			)
+			if err != nil {
+				return agency.Message{}, err
+			}
 
-		return agency.Message{
-			Role:    agency.Role(choice.Role),
-			Content: []byte(choice.Content),
-		}, nil
-	})
+			if len(resp.Choices) < 1 {
+				return agency.Message{}, errors.New("no choice")
+			}
+			choice := resp.Choices[0].Message // TODO what about other choices?
+
+			return agency.Message{
+				Role:    agency.Role(choice.Role),
+				Content: []byte(choice.Content),
+			}, nil
+		},
+	)
 }

@@ -15,6 +15,8 @@ type ImageToTextParams struct {
 	MaxTokens   int
 }
 
+
+// ImageToText is an operation builder that creates operation than can convert image to text.
 func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 		openaiMsg := openai.ChatCompletionMessage{
