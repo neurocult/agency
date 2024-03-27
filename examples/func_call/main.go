@@ -1,8 +1,3 @@
-// based on user input
-// 1) call 2 functions, A then B then answer
-// 2) call 1 function A or B
-// 3) just answer (no function call)
-
 package main
 
 import (

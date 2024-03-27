@@ -59,6 +59,8 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 			})
 
 			for {
+				fmt.Println("===ITERATION===")
+
 				openAIResponse, err := p.client.CreateChatCompletion(
 					ctx,
 					openai.ChatCompletionRequest{
@@ -77,6 +79,8 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 					return agency.Message{}, errors.New("no choice")
 				}
 				firstChoice := openAIResponse.Choices[0]
+
+				fmt.Println(firstChoice.Message.ToolCalls)
 
 				if len(firstChoice.Message.ToolCalls) == 0 {
 					return agency.Message{
