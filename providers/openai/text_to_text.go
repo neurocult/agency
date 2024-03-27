@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/neurocult/agency"
 )
@@ -23,11 +24,12 @@ type TextToTextParams struct {
 type FuncDef struct {
 	Name        string
 	Description string
-	Parameters  any // Parameters is a structure that defines the schema of the parameters that the function accepts.
+	// Parameters is an optional structure that defines the schema of the parameters that the function accepts.
+	Parameters *jsonschema.Definition
 	// Body is the actual function that get's called.
-	// Parameters must be pointer to a structure that matches `Parameters` schema via json-tags.
-	// Returned result must be json-marshallable object.
-	Body func(ctx context.Context, params any) (any, error)
+	// Parameters passed are bytes that can be unmarshalled to type that implements provided json schema.
+	// Returned result must be anything that can be marshalled, including primitive values.
+	Body func(ctx context.Context, params []byte) (any, error)
 }
 
 // TextToText is an operation builder that creates operation than can convert text to text.
@@ -74,29 +76,22 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 				if len(openAIResponse.Choices) < 1 {
 					return agency.Message{}, errors.New("no choice")
 				}
-				answer := openAIResponse.Choices[0]
+				firstChoice := openAIResponse.Choices[0]
 
-				if answer.FinishReason != openai.FinishReasonFunctionCall {
+				if len(firstChoice.Message.ToolCalls) == 0 {
 					return agency.Message{
-						Role:    agency.Role(answer.Message.Role),
-						Content: []byte(answer.Message.Content),
+						Role:    agency.Role(firstChoice.Message.Role),
+						Content: []byte(firstChoice.Message.Content),
 					}, nil
 				}
 
-				funcToCall := getFuncDefByName(params.FuncDefs, answer.Message.FunctionCall.Name)
+				firstToolCall := firstChoice.Message.ToolCalls[0]
+				funcToCall := getFuncDefByName(params.FuncDefs, firstToolCall.Function.Name)
 				if funcToCall == nil {
 					return agency.Message{}, errors.New("function not found")
 				}
 
-				var params = funcToCall.Parameters
-				if err = json.Unmarshal([]byte(answer.Message.FunctionCall.Arguments), &params); err != nil {
-					return agency.Message{}, fmt.Errorf(
-						"unmarshal %s arguments: %w",
-						answer.Message.FunctionCall.Name, err,
-					)
-				}
-
-				funcResult, err := funcToCall.Body(ctx, params)
+				funcResult, err := funcToCall.Body(ctx, []byte(firstToolCall.Function.Arguments))
 				if err != nil {
 					return agency.Message{}, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
 				}
@@ -120,14 +115,21 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 func castFuncDefsToOpenAITools(funcDefs []FuncDef) []openai.Tool {
 	tools := make([]openai.Tool, 0, len(funcDefs))
 	for _, f := range funcDefs {
-		tools = append(tools, openai.Tool{
+		tool := openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
 				Name:        f.Name,
 				Description: f.Description,
-				Parameters:  f.Parameters,
 			},
-		})
+		}
+		if f.Parameters != nil {
+			tool.Function.Parameters = f.Parameters
+		} else {
+			tool.Function.Parameters = jsonschema.Definition{
+				Type: jsonschema.Object, // because we can't pass empty parameters
+			}
+		}
+		tools = append(tools, tool)
 	}
 	return tools
 }
