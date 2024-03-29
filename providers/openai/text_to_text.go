@@ -80,8 +80,6 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 				}
 				firstChoice := openAIResponse.Choices[0]
 
-				fmt.Println(firstChoice.Message.ToolCalls)
-
 				if len(firstChoice.Message.ToolCalls) == 0 {
 					return agency.Message{
 						Role:    agency.Role(firstChoice.Message.Role),
@@ -106,8 +104,9 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 				}
 
 				openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-					Role:    openai.ChatMessageRoleAssistant,
+					Role:    openai.ChatMessageRoleFunction,
 					Content: string(bb),
+					Name:    firstToolCall.Function.Name,
 				})
 			}
 		},
