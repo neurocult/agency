@@ -59,8 +59,6 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 			})
 
 			for {
-				fmt.Println("===ITERATION===")
-
 				openAIResponse, err := p.client.CreateChatCompletion(
 					ctx,
 					openai.ChatCompletionRequest{
@@ -87,6 +85,8 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 					}, nil
 				}
 
+				openAIMessages = append(openAIMessages, firstChoice.Message)
+
 				firstToolCall := firstChoice.Message.ToolCalls[0]
 				funcToCall := getFuncDefByName(params.FuncDefs, firstToolCall.Function.Name)
 				if funcToCall == nil {
@@ -104,9 +104,10 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 				}
 
 				openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-					Role:    openai.ChatMessageRoleFunction,
-					Content: string(bb),
-					Name:    firstToolCall.Function.Name,
+					Role:       openai.ChatMessageRoleTool,
+					Content:    string(bb),
+					Name:       firstToolCall.Function.Name,
+					ToolCallID: firstToolCall.ID,
 				})
 			}
 		},
