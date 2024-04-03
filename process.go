@@ -9,6 +9,7 @@ type Process struct {
 	operations []*Operation
 }
 
+// NewProcess creates a new Process with given operations.
 func NewProcess(operations ...*Operation) *Process {
 	return &Process{
 		operations: operations,
