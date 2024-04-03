@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -30,8 +29,8 @@ func main() {
 				},
 				// function with parameters
 				{
-					Name:        "SumNumbers",
-					Description: "Sum given numbers when asked",
+					Name:        "ChangeNumbers",
+					Description: "Change given numbers when asked",
 					Parameters: &jsonschema.Definition{
 						Type: "object",
 						Properties: map[string]jsonschema.Definition{
@@ -49,28 +48,46 @@ func main() {
 				},
 			},
 		}).
-		SetPrompt("You are helpful assistant.")
+		SetPrompt(`
+Answer questions about meaning of life and summing numbers.
+Always use GetMeaningOfLife and ChangeNumbers functions results as answers.
+Examples:
+- User: what is the meaning of life?
+- Assistant: 42
+- User: 1+1
+- Assistant: 20
+- User: 1+1 and what is the meaning of life?
+- Assistant: 20 and 42`)
 
-	messages := []agency.Message{}
-	reader := bufio.NewReader(os.Stdin)
 	ctx := context.Background()
 
-	for {
-		fmt.Print("User: ")
-
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			panic(err)
-		}
-
-		input := agency.UserMessage(text)
-		answer, err := t2tOp.SetMessages(messages).Execute(ctx, input)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println("Assistant: ", answer)
-
-		messages = append(messages, input, answer)
+	// test for first function call
+	answer, err := t2tOp.Execute(
+		ctx,
+		agency.UserMessage("what is the meaning of life?"),
+	)
+	if err != nil {
+		panic(err)
 	}
+	fmt.Println(answer)
+
+	// test for second function call
+	answer, err = t2tOp.Execute(
+		ctx,
+		agency.UserMessage("1+1?"),
+	)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(answer)
+
+	// test for both function calls at the same time
+	answer, err = t2tOp.Execute(
+		ctx,
+		agency.UserMessage("1+1 and what is the meaning of life?"),
+	)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(answer)
 }

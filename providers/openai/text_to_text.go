@@ -87,28 +87,29 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 
 				openAIMessages = append(openAIMessages, firstChoice.Message)
 
-				firstToolCall := firstChoice.Message.ToolCalls[0]
-				funcToCall := getFuncDefByName(params.FuncDefs, firstToolCall.Function.Name)
-				if funcToCall == nil {
-					return agency.Message{}, errors.New("function not found")
-				}
+				for _, toolCall := range firstChoice.Message.ToolCalls {
+					funcToCall := getFuncDefByName(params.FuncDefs, toolCall.Function.Name)
+					if funcToCall == nil {
+						return agency.Message{}, errors.New("function not found")
+					}
 
-				funcResult, err := funcToCall.Body(ctx, []byte(firstToolCall.Function.Arguments))
-				if err != nil {
-					return agency.Message{}, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
-				}
+					funcResult, err := funcToCall.Body(ctx, []byte(toolCall.Function.Arguments))
+					if err != nil {
+						return agency.Message{}, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
+					}
 
-				bb, err := json.Marshal(funcResult)
-				if err != nil {
-					return agency.Message{}, fmt.Errorf("marshal function result: %w", err)
-				}
+					bb, err := json.Marshal(funcResult)
+					if err != nil {
+						return agency.Message{}, fmt.Errorf("marshal function result: %w", err)
+					}
 
-				openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-					Role:       openai.ChatMessageRoleTool,
-					Content:    string(bb),
-					Name:       firstToolCall.Function.Name,
-					ToolCallID: firstToolCall.ID,
-				})
+					openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+						Role:       openai.ChatMessageRoleTool,
+						Content:    string(bb),
+						Name:       toolCall.Function.Name,
+						ToolCallID: toolCall.ID,
+					})
+				}
 			}
 		},
 	)
