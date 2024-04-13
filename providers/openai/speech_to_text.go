@@ -22,7 +22,7 @@ func (f Provider) SpeechToText(params SpeechToTextParams) *agency.Operation {
 				Prompt:      cfg.Prompt,
 				FilePath:    "speech.ogg",
 				Reader:      bytes.NewReader(msg.Content),
-				Temperature: getTemperature(params.Temperature),
+				Temperature: nullableToFloat32(params.Temperature),
 			})
 			if err != nil {
 				return agency.Message{}, err

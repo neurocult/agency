@@ -15,7 +15,9 @@ import (
 )
 
 func main() {
-	provider := openai.New(openai.Params{Key: "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"})
+	provider := openai.New(openai.Params{
+		Key: os.Getenv("OPENAI_API_KEY"),
+	})
 
 	result, err := provider.TextToImage(openai.TextToImageParams{
 		Model:     "dall-e-2",

@@ -40,9 +40,9 @@ func Temperature(v float32) NullableFloat32 {
 	return &v
 }
 
-// getTemperature replaces nil with zero (in this case value won't be included in api request)
+// nullableToFloat32 replaces nil with zero (in this case value won't be included in api request)
 // and for real zeros it returns math.SmallestNonzeroFloat32 that is as close to zero as possible.
-func getTemperature(v NullableFloat32) float32 {
+func nullableToFloat32(v NullableFloat32) float32 {
 	if v == nil {
 		return 0
 	}

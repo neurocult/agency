@@ -42,7 +42,7 @@ func (p Provider) TextToStream(params TextToStreamParams, handler streamHandler)
 			ctx,
 			openai.ChatCompletionRequest{
 				Model:       params.Model,
-				Temperature: getTemperature(params.Temperature),
+				Temperature: nullableToFloat32(params.Temperature),
 				MaxTokens:   params.MaxTokens,
 				Messages:    openAIMessages,
 				Stream:      true,

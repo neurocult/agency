@@ -63,7 +63,7 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 					ctx,
 					openai.ChatCompletionRequest{
 						Model:       params.Model,
-						Temperature: getTemperature(params.Temperature),
+						Temperature: nullableToFloat32(params.Temperature),
 						MaxTokens:   params.MaxTokens,
 						Messages:    openAIMessages,
 						Tools:       openAITools,
@@ -122,7 +122,7 @@ func castFuncDefsToOpenAITools(funcDefs []FuncDef) []openai.Tool {
 	for _, f := range funcDefs {
 		tool := openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        f.Name,
 				Description: f.Description,
 			},

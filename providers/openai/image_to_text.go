@@ -11,10 +11,12 @@ import (
 )
 
 type ImageToTextParams struct {
-	Temperature NullableFloat32
-	MaxTokens   int
+	MaxTokens        int
+	Temperature      NullableFloat32
+	TopP             NullableFloat32
+	FrequencyPenalty NullableFloat32
+	PresencePenalty  NullableFloat32
 }
-
 
 // ImageToText is an operation builder that creates operation than can convert image to text.
 func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
@@ -42,10 +44,13 @@ func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
 		)
 
 		resp, err := f.client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-			MaxTokens:   params.MaxTokens,
-			Model:       openai.GPT4VisionPreview,
-			Messages:    []openai.ChatCompletionMessage{openaiMsg},
-			Temperature: getTemperature(params.Temperature),
+			MaxTokens:        params.MaxTokens,
+			Model:            openai.GPT4Turbo,
+			Messages:         []openai.ChatCompletionMessage{openaiMsg},
+			Temperature:      nullableToFloat32(params.Temperature),
+			TopP:             nullableToFloat32(params.TopP),
+			FrequencyPenalty: nullableToFloat32(params.FrequencyPenalty),
+			PresencePenalty:  nullableToFloat32(params.PresencePenalty),
 		})
 		if err != nil {
 			return agency.Message{}, err
