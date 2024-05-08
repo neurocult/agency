@@ -6,8 +6,8 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
-
 	"github.com/neurocult/agency"
+
 	"github.com/neurocult/agency/providers/openai"
 )
 
@@ -22,7 +22,7 @@ func main() {
 		SetPrompt("describe what you see").
 		Execute(
 			context.Background(),
-			agency.Message{Content: imgBytes},
+			agency.NewMessage(agency.UserRole, agency.ImageKind, imgBytes),
 		)
 	if err != nil {
 		panic(err)

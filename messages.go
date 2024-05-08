@@ -1,15 +1,19 @@
 package agency
 
-import "fmt"
-
-type Message struct {
-	Role    Role
-	Content []byte
+type Message interface {
+	Role() Role
+	Content() []byte
+	Kind() Kind
 }
 
-func (m Message) String() string {
-	return string(m.Content)
-}
+type Kind string
+
+const (
+	TextKind   Kind = "text"
+	ImageKind  Kind = "image"
+	VoiceKind  Kind = "voice"
+	VectorKind Kind = "vector"
+)
 
 type Role string
 
@@ -17,15 +21,31 @@ const (
 	UserRole      Role = "user"
 	SystemRole    Role = "system"
 	AssistantRole Role = "assistant"
+	ToolRole      Role = "tool"
 )
 
-// UserMessage creates new `Message` with the `Role` equal to `user`
-func UserMessage(content string, args ...any) Message {
-	s := fmt.Sprintf(content, args...)
-	return Message{Role: UserRole, Content: []byte(s)}
+type BaseMessage struct {
+	content []byte
+	role    Role
+	kind    Kind
 }
 
-// SystemMessage creates new `Message` with the `Role` equal to `system`
-func SystemMessage(content string) Message {
-	return Message{Role: SystemRole, Content: []byte(content)}
+func (bm BaseMessage) Role() Role {
+	return bm.role
+}
+
+func (bm BaseMessage) Kind() Kind {
+	return bm.kind
+}
+func (bm BaseMessage) Content() []byte {
+	return bm.content
+}
+
+// NewMessage creates new `Message` with the specified `Role` and `Kind`
+func NewMessage(role Role, kind Kind, content []byte) BaseMessage {
+	return BaseMessage{
+		content: content,
+		role:    role,
+		kind:    kind,
+	}
 }

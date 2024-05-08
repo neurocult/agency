@@ -28,7 +28,7 @@ func main() {
 			Model:     goopenai.CreateImageModelDallE2,
 			ImageSize: goopenai.CreateImageSize256x256,
 		}),
-	).Execute(context.Background(), agency.Message{Content: data})
+	).Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.VoiceKind, data))
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +39,7 @@ func main() {
 }
 
 func saveImgToDisk(msg agency.Message) error {
-	r := bytes.NewReader(msg.Content)
+	r := bytes.NewReader(msg.Content())
 
 	imgData, err := png.Decode(r)
 	if err != nil {

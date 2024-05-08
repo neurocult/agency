@@ -21,24 +21,21 @@ func (f Provider) TextToSpeech(params TextToSpeechParams) *agency.Operation {
 		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 			resp, err := f.client.CreateSpeech(ctx, openai.CreateSpeechRequest{
 				Model:          openai.SpeechModel(params.Model),
-				Input:          msg.String(),
+				Input:          string(msg.Content()),
 				Voice:          openai.SpeechVoice(params.Voice),
 				ResponseFormat: openai.SpeechResponseFormat(params.ResponseFormat),
 				Speed:          params.Speed,
 			})
 			if err != nil {
-				return agency.Message{}, err
+				return nil, err
 			}
 
 			bb, err := io.ReadAll(resp)
 			if err != nil {
-				return agency.Message{}, err
+				return nil, err
 			}
 
-			return agency.Message{
-				Role:    agency.AssistantRole,
-				Content: bb,
-			}, nil
+			return agency.NewMessage(agency.AssistantRole, agency.VoiceKind, bb), nil
 		},
 	)
 }

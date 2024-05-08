@@ -24,7 +24,7 @@ func (p Provider) TextToEmbedding(params TextToEmbeddingParams) *agency.Operatio
 		texts := make([]string, len(messages))
 
 		for i, m := range messages {
-			texts[i] = m.String()
+			texts[i] = string(m.Content())
 		}
 
 		resp, err := p.client.CreateEmbeddings(
@@ -35,7 +35,7 @@ func (p Provider) TextToEmbedding(params TextToEmbeddingParams) *agency.Operatio
 			},
 		)
 		if err != nil {
-			return agency.Message{}, err
+			return nil, err
 		}
 
 		vectors := make([][]float32, len(resp.Data))
@@ -45,13 +45,10 @@ func (p Provider) TextToEmbedding(params TextToEmbeddingParams) *agency.Operatio
 
 		bytes, err := EmbeddingToBytes(1536, vectors)
 		if err != nil {
-			return agency.Message{}, fmt.Errorf("failed to convert embedding to bytes: %w", err)
+			return nil, fmt.Errorf("failed to convert embedding to bytes: %w", err)
 		}
 
-		return agency.Message{
-			Role: agency.AssistantRole,
-			//TODO: we have to convert []float32 to []byte. Can we optimize it?
-			Content: bytes,
-		}, nil
+		//TODO: we have to convert []float32 to []byte. Can we optimize it?
+		return agency.NewMessage(agency.AssistantRole, agency.VectorKind, bytes), nil
 	})
 }

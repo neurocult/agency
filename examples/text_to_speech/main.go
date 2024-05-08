@@ -11,11 +11,15 @@ import (
 )
 
 func main() {
-	input := agency.UserMessage(`
+	input := agency.NewMessage(
+
+		agency.UserRole,
+		agency.TextKind,
+		[]byte(`
 		One does not simply walk into Mordor.
 		Its black gates are guarded by more than just Orcs.
 		There is evil there that does not sleep, and the Great Eye is ever watchful.
-	`)
+	`))
 
 	msg, err := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")}).
 		TextToSpeech(openai.TextToSpeechParams{
@@ -42,7 +46,7 @@ func saveToDisk(msg agency.Message) error {
 	}
 	defer file.Close()
 
-	_, err = file.Write(msg.Content)
+	_, err = file.Write(msg.Content())
 	if err != nil {
 		return err
 	}

@@ -22,7 +22,7 @@ func main() {
 	).
 		Execute(
 			context.Background(),
-			agency.UserMessage("Kazakhstan alga!"),
+			agency.NewMessage(agency.UserRole, agency.TextKind, []byte("Kazakhstan alga!")),
 			Logger,
 		)
 
