@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	imgBytes, err := os.ReadFile("example.png")
+	imgBytes, err := os.ReadFile("../example.png")
 	if err != nil {
 		panic(err)
 	}

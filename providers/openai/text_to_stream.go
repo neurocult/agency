@@ -33,17 +33,42 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 				Content: cfg.Prompt,
 			})
 
-			for _, textMsg := range cfg.Messages {
-				openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-					Role:    string(textMsg.Role()),
-					Content: string(textMsg.Content()),
-				})
+			for _, cfgMsg := range cfg.Messages {
+				openaiCfgMsg := openai.ChatCompletionMessage{
+					Role: string(cfgMsg.Role()),
+				}
+
+				switch cfgMsg.Kind() {
+				case agency.TextKind:
+					openaiCfgMsg.Content = string(cfgMsg.Content())
+				case agency.ImageKind:
+					openaiCfgMsg.MultiContent = append(
+						openaiCfgMsg.MultiContent,
+						openAIBase64ImageMessage(cfgMsg.Content()),
+					)
+				default:
+					return nil, fmt.Errorf("text to stream doesn't support %s kind", cfgMsg.Kind())
+				}
+				openAIMessages = append(openAIMessages, openaiCfgMsg)
 			}
 
-			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleUser,
-				Content: string(msg.Content()),
-			})
+			openaiMsg := openai.ChatCompletionMessage{
+				Role: openai.ChatMessageRoleUser,
+			}
+
+			switch msg.Kind() {
+			case agency.TextKind:
+				openaiMsg.Content = string(msg.Content())
+			case agency.ImageKind:
+				openaiMsg.MultiContent = append(
+					openaiMsg.MultiContent,
+					openAIBase64ImageMessage(msg.Content()),
+				)
+			default:
+				return nil, fmt.Errorf("text to stream doesn't support %s kind", msg.Kind())
+			}
+
+			openAIMessages = append(openAIMessages, openaiMsg)
 
 			for {
 				openAIResponse, err := p.client.CreateChatCompletionStream(
