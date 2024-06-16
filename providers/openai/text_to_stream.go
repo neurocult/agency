@@ -104,8 +104,8 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 					recv, err := openAIResponse.Recv()
 					if errors.Is(err, io.EOF) { // last message
 						if len(accumulatedStreamedFunctions) == 0 {
-							// TODO return usage
-							fmt.Println(usage)
+							// TODO update operation API and return usage along with message
+							_ = usage
 
 							return agency.NewMessage(
 								agency.AssistantRole,
