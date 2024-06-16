@@ -24,6 +24,12 @@ var ToolAnswerShouldBeFinal = errors.New("tool answer should be final")
 func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 	openAITools := castFuncDefsToOpenAITools(params.FuncDefs)
 
+	var toolChoice *string
+	if len(openAITools) > 0 {
+		v := "required"
+		toolChoice = &v
+	}
+
 	return agency.NewOperation(
 		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 			openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
@@ -70,7 +76,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 
 			openAIMessages = append(openAIMessages, openaiMsg)
 
-			for {
+			for { // streaming loop
 				openAIResponse, err := p.client.CreateChatCompletionStream(
 					ctx,
 					openai.ChatCompletionRequest{
@@ -80,6 +86,10 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						Messages:    openAIMessages,
 						Tools:       openAITools,
 						Stream:      params.Stream != nil,
+						ToolChoice:  toolChoice,
+						StreamOptions: &openai.StreamOptions{
+							IncludeUsage: true,
+						},
 					},
 				)
 				if err != nil {
@@ -88,11 +98,20 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 
 				var content string
 				var accumulatedStreamedFunctions = make([]openai.ToolCall, 0, len(openAITools))
+				var usage openai.Usage
+
 				for {
 					recv, err := openAIResponse.Recv()
-					if errors.Is(err, io.EOF) {
+					if errors.Is(err, io.EOF) { // last message
 						if len(accumulatedStreamedFunctions) == 0 {
-							return agency.NewMessage(agency.AssistantRole, agency.TextKind, []byte(content)), nil
+							// TODO return usage
+							fmt.Println(usage)
+
+							return agency.NewMessage(
+								agency.AssistantRole,
+								agency.TextKind,
+								[]byte(content),
+							), nil
 						}
 
 						break
@@ -100,6 +119,11 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 
 					if err != nil {
 						return nil, err
+					}
+
+					if recv.Usage != nil { // penultimate message
+						usage = *recv.Usage
+						continue
 					}
 
 					if len(recv.Choices) < 1 {
@@ -157,6 +181,9 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 
 						if isFinal {
 							params.Stream <- string(escapedFuncResult)
+
+							// TODO return usage
+							// fmt.Println(usage)
 
 							return agency.NewMessage(agency.ToolRole, agency.TextKind, []byte(content)), nil
 						}
