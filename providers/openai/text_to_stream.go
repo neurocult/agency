@@ -12,11 +12,12 @@ import (
 )
 
 type TextToStreamParams struct {
-	Model         string
-	Temperature   NullableFloat32
-	MaxTokens     int
-	FuncDefs      []FuncDef
-	StreamHandler func(delta, total string, isFirst, isLast bool) error
+	Model               string
+	Temperature         NullableFloat32
+	MaxTokens           int
+	FuncDefs            []FuncDef
+	StreamHandler       func(delta, total string, isFirst, isLast bool) error
+	IsToolsCallRequired bool
 }
 
 var ToolAnswerShouldBeFinal = errors.New("tool answer should be final")
@@ -25,7 +26,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 	openAITools := castFuncDefsToOpenAITools(params.FuncDefs)
 
 	var toolChoice *string
-	if len(openAITools) > 0 {
+	if params.IsToolsCallRequired {
 		v := "required"
 		toolChoice = &v
 	}
