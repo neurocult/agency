@@ -107,7 +107,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 					recv, err := openAIResponse.Recv()
 					isLastDelta = errors.Is(err, io.EOF)
 
-					if len(lastDelta) > 0 || isLastDelta {
+					if len(lastDelta) > 0 || (isLastDelta && len(content) > 0) {
 						if err = params.StreamHandler(lastDelta, content, isFirstDelta, isLastDelta); err != nil {
 							return nil, fmt.Errorf("handing stream: %w", err)
 						}
