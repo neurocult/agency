@@ -171,6 +171,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						continue
 					}
 
+					// Saving tool call to history
 					openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
 						Role:      openai.ChatMessageRoleAssistant,
 						ToolCalls: accumulatedStreamedFunctions,
@@ -195,7 +196,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						}
 
 						if isFunctionCallShouldBeFinal {
-							return agency.NewMessage(agency.ToolRole, agency.TextKind, []byte(content)), nil
+							return agency.NewMessage(agency.AssistantRole, agency.TextKind, []byte(content)), nil
 						}
 
 						openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
