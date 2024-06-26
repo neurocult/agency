@@ -12,11 +12,11 @@ import (
 )
 
 type TextToStreamParams struct {
-	Model       string
-	Temperature NullableFloat32
-	MaxTokens   int
-	FuncDefs    []FuncDef
-	Stream      chan<- string
+	Model         string
+	Temperature   NullableFloat32
+	MaxTokens     int
+	FuncDefs      []FuncDef
+	StreamHandler func(delta, total string, isFirst, isLast bool) error
 }
 
 var ToolAnswerShouldBeFinal = errors.New("tool answer should be final")
@@ -85,7 +85,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						MaxTokens:   params.MaxTokens,
 						Messages:    openAIMessages,
 						Tools:       openAITools,
-						Stream:      params.Stream != nil,
+						Stream:      params.StreamHandler != nil,
 						ToolChoice:  toolChoice,
 						StreamOptions: &openai.StreamOptions{
 							IncludeUsage: true,
@@ -99,10 +99,23 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 				var content string
 				var accumulatedStreamedFunctions = make([]openai.ToolCall, 0, len(openAITools))
 				var usage openai.Usage
+				var isFirstDelta = true
+				var isLastDelta = false
+				var lastDelta string
 
 				for {
 					recv, err := openAIResponse.Recv()
-					if errors.Is(err, io.EOF) { // last message
+					isLastDelta = errors.Is(err, io.EOF)
+
+					if len(lastDelta) > 0 || isLastDelta {
+						if err = params.StreamHandler(lastDelta, content, isFirstDelta, isLastDelta); err != nil {
+							return nil, fmt.Errorf("handing stream: %w", err)
+						}
+
+						isFirstDelta = false
+					}
+
+					if isLastDelta {
 						if len(accumulatedStreamedFunctions) == 0 {
 							// TODO update operation API and return usage along with message
 							_ = usage
@@ -133,8 +146,10 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 					firstChoice := recv.Choices[0]
 
 					if len(firstChoice.Delta.Content) > 0 {
-						params.Stream <- firstChoice.Delta.Content
-						content += firstChoice.Delta.Content
+						lastDelta = firstChoice.Delta.Content
+						content += lastDelta
+					} else {
+						lastDelta = ""
 					}
 
 					for index, toolCall := range firstChoice.Delta.ToolCalls {
@@ -169,8 +184,8 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						}
 
 						funcResult, err := funcToCall.Body(ctx, []byte(toolCall.Function.Arguments))
-						var isFinal = errors.Is(err, ToolAnswerShouldBeFinal)
-						if err != nil && !isFinal {
+						var isFunctionCallShouldBeFinal = errors.Is(err, ToolAnswerShouldBeFinal)
+						if err != nil && !isFunctionCallShouldBeFinal {
 							return nil, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
 						}
 
@@ -179,12 +194,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 							return nil, fmt.Errorf("marshal function result: %w", err)
 						}
 
-						if isFinal {
-							params.Stream <- string(escapedFuncResult)
-
-							// TODO return usage
-							// fmt.Println(usage)
-
+						if isFunctionCallShouldBeFinal {
 							return agency.NewMessage(agency.ToolRole, agency.TextKind, []byte(content)), nil
 						}
 

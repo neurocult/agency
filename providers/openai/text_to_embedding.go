@@ -38,7 +38,7 @@ func (p Provider) TextToEmbedding(params TextToEmbeddingParams) *agency.Operatio
 			return nil, err
 		}
 
-		vectors := make([][]float32, len(resp.Data))
+		vectors := make([]Embedding, len(resp.Data))
 		for i, vector := range resp.Data {
 			vectors[i] = vector.Embedding
 		}

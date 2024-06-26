@@ -9,11 +9,10 @@ import (
 	"github.com/neurocult/agency"
 
 	providers "github.com/neurocult/agency/providers/openai"
-	"github.com/sashabaranov/go-openai"
 )
 
 func main() {
-	imgBytes, err := os.ReadFile("assets/dracula.png")
+	imgBytes, err := os.ReadFile("assets/test.jpg")
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +22,7 @@ func main() {
 	go func() {
 		defer close(stream)
 		result, err := providers.New(providers.Params{Key: os.Getenv("OPENAI_API_KEY")}).
-			TextToStream(providers.TextToStreamParams{MaxTokens: 300, Model: openai.GPT4Turbo, Stream: stream}).
+			TextToStream(providers.TextToStreamParams{MaxTokens: 300, Model: "gpt-4o", Stream: stream}).
 			SetPrompt("describe what you see").
 			Execute(
 				context.Background(),

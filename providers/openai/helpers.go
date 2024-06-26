@@ -6,7 +6,9 @@ import (
 	"math"
 )
 
-func EmbeddingToBytes(dimensions int, embeddings [][]float32) ([]byte, error) {
+type Embedding []float32
+
+func EmbeddingToBytes(dimensions int, embeddings []Embedding) ([]byte, error) {
 	if len(embeddings) == 0 {
 		return nil, fmt.Errorf("embeddings is empty")
 	}
@@ -27,12 +29,12 @@ func EmbeddingToBytes(dimensions int, embeddings [][]float32) ([]byte, error) {
 	return buf, nil
 }
 
-func BytesToEmbedding(dimensions int, buf []byte) ([][]float32, error) {
+func BytesToEmbedding(dimensions int, buf []byte) ([]Embedding, error) {
 	if mltp := len(buf) % (dimensions * 4); mltp != 0 {
 		return nil, fmt.Errorf("invalid buffer length: got %d, but expected multiple of %d", len(buf), dimensions*4)
 	}
 
-	embeddings := make([][]float32, len(buf)/dimensions/4)
+	embeddings := make([]Embedding, len(buf)/dimensions/4)
 	for i := range embeddings {
 		embeddings[i] = make([]float32, dimensions)
 		for j := 0; j < dimensions; j++ {

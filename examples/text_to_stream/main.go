@@ -14,24 +14,27 @@ import (
 
 func main() {
 	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
-	stream := make(chan string)
 
-	go func() {
-		defer close(stream)
+	result, err := factory.
+		TextToStream(openai.TextToStreamParams{Model: goopenai.GPT3Dot5Turbo, StreamHandler: func(delta, total string, isFirst, isLast bool) error {
+			if isFirst {
+				fmt.Println("====Start streaming====\n")
+			}
 
-		result, err := factory.
-			TextToStream(openai.TextToStreamParams{Model: goopenai.GPT3Dot5Turbo, Stream: stream}).
-			SetPrompt("Write a few sentences about topic").
-			Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.TextKind, []byte("I love programming.")))
+			fmt.Print(delta)
 
-		if err != nil {
-			panic(err)
-		}
+			if isLast {
+				fmt.Println("\n\n====Finish streaming====")
+			}
 
-		fmt.Println("\nFinal result:", string(result.Content()))
-	}()
+			return nil
+		}}).
+		SetPrompt("Write a few sentences about topic").
+		Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.TextKind, []byte("I love programming.")))
 
-	for s := range stream {
-		fmt.Println(s)
+	if err != nil {
+		panic(err)
 	}
+
+	fmt.Println("\nResult:", string(result.Content()))
 }
