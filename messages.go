@@ -49,3 +49,20 @@ func NewMessage(role Role, kind Kind, content []byte) BaseMessage {
 		kind:    kind,
 	}
 }
+
+// NewTextMessage creates new `Message` with Text kind and the specified `Role`
+func NewTextMessage(role Role, content string) BaseMessage {
+	return BaseMessage{
+		content: []byte(content),
+		role:    role,
+		kind:    TextKind,
+	}
+}
+
+func GetStringContent(msg Message) string {
+	if msg.Kind() == TextKind {
+		return string(msg.Content())
+	}
+
+	return ""
+}

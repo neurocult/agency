@@ -6,7 +6,7 @@ import (
 )
 
 func TestEmbeddingToBytes(t *testing.T) {
-	floats := [][]float32{{1.1, 2.2, 3.3}, {4.4, 5.5, 6.6}}
+	floats := []Embedding{{1.1, 2.2, 3.3}, {4.4, 5.5, 6.6}}
 
 	bytes, err := EmbeddingToBytes(3, floats)
 	if err != nil {
@@ -22,7 +22,7 @@ func TestEmbeddingToBytes(t *testing.T) {
 		t.Errorf("floats and newFloats are not equal %v %v", floats, newFloats)
 	}
 
-	wrongFloats := [][]float32{{4.4, 5.5, 6.6, 7.7}}
+	wrongFloats := []Embedding{{4.4, 5.5, 6.6, 7.7}}
 
 	_, err = EmbeddingToBytes(3, wrongFloats)
 	if err == nil {

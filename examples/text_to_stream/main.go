@@ -18,13 +18,13 @@ func main() {
 	result, err := factory.
 		TextToStream(openai.TextToStreamParams{Model: goopenai.GPT3Dot5Turbo, StreamHandler: func(delta, total string, isFirst, isLast bool) error {
 			if isFirst {
-				fmt.Println("====Start streaming====\n")
+				fmt.Println("====Start streaming====")
 			}
 
 			fmt.Print(delta)
 
 			if isLast {
-				fmt.Println("\n\n====Finish streaming====")
+				fmt.Println("\n====Finish streaming====")
 			}
 
 			return nil

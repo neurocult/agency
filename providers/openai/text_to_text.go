@@ -29,7 +29,7 @@ type FuncDef struct {
 	// Body is the actual function that get's called.
 	// Parameters passed are bytes that can be unmarshalled to type that implements provided json schema.
 	// Returned result must be anything that can be marshalled, including primitive values.
-	Body func(ctx context.Context, params []byte) (any, error)
+	Body func(ctx context.Context, params []byte) (agency.Message, error)
 }
 
 // TextToText is an operation builder that creates operation than can convert text to text.

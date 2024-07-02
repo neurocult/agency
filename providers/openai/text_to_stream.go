@@ -2,7 +2,6 @@ package openai
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -20,7 +19,7 @@ type TextToStreamParams struct {
 	IsToolsCallRequired bool
 }
 
-var ToolAnswerShouldBeFinal = errors.New("tool answer should be final")
+var ToolAnswerAsModelsAnswer = errors.New("tool answer should be final")
 
 func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 	openAITools := castFuncDefsToOpenAITools(params.FuncDefs)
@@ -41,21 +40,11 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 			})
 
 			for _, cfgMsg := range cfg.Messages {
-				openaiCfgMsg := openai.ChatCompletionMessage{
-					Role: string(cfgMsg.Role()),
+				openaiCfgMsg, err := messageToOpenAI(cfgMsg)
+				if err != nil {
+					return nil, fmt.Errorf("openAI msg mapping: %w", err)
 				}
 
-				switch cfgMsg.Kind() {
-				case agency.TextKind:
-					openaiCfgMsg.Content = string(cfgMsg.Content())
-				case agency.ImageKind:
-					openaiCfgMsg.MultiContent = append(
-						openaiCfgMsg.MultiContent,
-						openAIBase64ImageMessage(cfgMsg.Content()),
-					)
-				default:
-					return nil, fmt.Errorf("text to stream doesn't support %s kind", cfgMsg.Kind())
-				}
 				openAIMessages = append(openAIMessages, openaiCfgMsg)
 			}
 
@@ -179,33 +168,32 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 					})
 
 					for _, toolCall := range accumulatedStreamedFunctions {
-
 						funcToCall := getFuncDefByName(params.FuncDefs, toolCall.Function.Name)
 						if funcToCall == nil {
 							return nil, errors.New("function not found")
 						}
 
-						funcResult, err := funcToCall.Body(ctx, []byte(toolCall.Function.Arguments))
-						var isFunctionCallShouldBeFinal = errors.Is(err, ToolAnswerShouldBeFinal)
-						if err != nil && !isFunctionCallShouldBeFinal {
+						var funcResult agency.Message
+						funcResult, err = funcToCall.Body(ctx, []byte(toolCall.Function.Arguments))
+						var isFunctionCallAsModelAnswer = errors.Is(err, ToolAnswerAsModelsAnswer)
+						if err != nil && !isFunctionCallAsModelAnswer {
 							return nil, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
 						}
 
-						escapedFuncResult, err := json.Marshal(funcResult)
+						if isFunctionCallAsModelAnswer {
+							return funcResult, nil
+						}
+
+						var openaiFuncResult openai.ChatCompletionMessage
+						openaiFuncResult, err = messageToOpenAI(funcResult)
 						if err != nil {
-							return nil, fmt.Errorf("marshal function result: %w", err)
+							return nil, fmt.Errorf("openAI msg mapping: %w", err)
 						}
 
-						if isFunctionCallShouldBeFinal {
-							return agency.NewMessage(agency.AssistantRole, agency.TextKind, []byte(content)), nil
-						}
+						openaiFuncResult.ToolCallID = toolCall.ID
+						openaiFuncResult.Name = toolCall.Function.Name
 
-						openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-							Role:       openai.ChatMessageRoleTool,
-							Content:    string(escapedFuncResult),
-							Name:       toolCall.Function.Name,
-							ToolCallID: toolCall.ID,
-						})
+						openAIMessages = append(openAIMessages, openaiFuncResult)
 					}
 				}
 
@@ -213,4 +201,24 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 			}
 		},
 	)
+}
+
+func messageToOpenAI(message agency.Message) (openai.ChatCompletionMessage, error) {
+	wrappedMessage := openai.ChatCompletionMessage{
+		Role: string(message.Role()),
+	}
+
+	switch message.Kind() {
+	case agency.TextKind:
+		wrappedMessage.Content = string(message.Content())
+	case agency.ImageKind:
+		wrappedMessage.MultiContent = append(
+			wrappedMessage.MultiContent,
+			openAIBase64ImageMessage(message.Content()),
+		)
+	default:
+		return openai.ChatCompletionMessage{}, fmt.Errorf("text to stream doesn't support %s kind", message.Kind())
+	}
+
+	return wrappedMessage, nil
 }
