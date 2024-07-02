@@ -180,10 +180,11 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 							return nil, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
 						}
 
+						if funcResult == nil {
+							return nil, fmt.Errorf("tool response shouldn't be nil")
+						}
+
 						if isFunctionCallAsModelAnswer {
-							if funcResult == nil {
-								return nil, fmt.Errorf("can't use ToolAnswerAsModelsAnswer with empty tool result")
-							}
 							return funcResult, nil
 						}
 
