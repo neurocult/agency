@@ -181,6 +181,9 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						}
 
 						if isFunctionCallAsModelAnswer {
+							if funcResult == nil {
+								return nil, fmt.Errorf("can't use ToolAnswerAsModelsAnswer with empty tool result")
+							}
 							return funcResult, nil
 						}
 
