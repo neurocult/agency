@@ -17,6 +17,7 @@ type TextToStreamParams struct {
 	FuncDefs            []FuncDef
 	StreamHandler       func(delta, total string, isFirst, isLast bool) error
 	IsToolsCallRequired bool
+	Seed                *int
 }
 
 var ToolAnswerAsModelsAnswer = errors.New("tool answer should be final")
@@ -80,6 +81,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						StreamOptions: &openai.StreamOptions{
 							IncludeUsage: true,
 						},
+						Seed: params.Seed,
 					},
 				)
 				if err != nil {

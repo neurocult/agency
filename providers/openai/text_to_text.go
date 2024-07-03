@@ -18,6 +18,7 @@ type TextToTextParams struct {
 	Temperature NullableFloat32
 	MaxTokens   int
 	FuncDefs    []FuncDef
+	Seed        *int
 }
 
 // FuncDef represents a function definition that can be called during the conversation.
@@ -67,6 +68,7 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 						MaxTokens:   params.MaxTokens,
 						Messages:    openAIMessages,
 						Tools:       openAITools,
+						Seed:        params.Seed,
 					},
 				)
 				if err != nil {
