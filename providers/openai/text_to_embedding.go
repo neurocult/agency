@@ -49,6 +49,6 @@ func (p Provider) TextToEmbedding(params TextToEmbeddingParams) *agency.Operatio
 		}
 
 		//TODO: we have to convert []float32 to []byte. Can we optimize it?
-		return agency.NewMessage(agency.AssistantRole, agency.VectorKind, bytes), nil
+		return agency.NewMessage(agency.AssistantRole, agency.EmbeddingKind, bytes), nil
 	})
 }

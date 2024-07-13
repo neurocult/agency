@@ -1,5 +1,7 @@
 package agency
 
+import "encoding/json"
+
 type Message interface {
 	Role() Role
 	Content() []byte
@@ -9,10 +11,10 @@ type Message interface {
 type Kind string
 
 const (
-	TextKind   Kind = "text"
-	ImageKind  Kind = "image"
-	VoiceKind  Kind = "voice"
-	VectorKind Kind = "vector"
+	TextKind      Kind = "text"
+	ImageKind     Kind = "image"
+	VoiceKind     Kind = "voice"
+	EmbeddingKind Kind = "embedding"
 )
 
 type Role string
@@ -57,6 +59,20 @@ func NewTextMessage(role Role, content string) BaseMessage {
 		role:    role,
 		kind:    TextKind,
 	}
+}
+
+// NewJsonMessage marshals content and creates new `Message` with text kind and the specified `Role`
+func NewJsonMessage(role Role, content any) (BaseMessage, error) {
+	data, err := json.Marshal(content)
+	if err != nil {
+		return BaseMessage{}, err
+	}
+
+	return BaseMessage{
+		content: data,
+		role:    role,
+		kind:    TextKind,
+	}, nil
 }
 
 func GetStringContent(msg Message) string {
