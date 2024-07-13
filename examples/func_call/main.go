@@ -24,7 +24,7 @@ func main() {
 					Name:        "GetMeaningOfLife",
 					Description: "Answer questions about meaning of life",
 					Body: func(ctx context.Context, _ []byte) (agency.Message, error) {
-						return agency.NewTextMessage(agency.AssistantRole, "42"), nil
+						return agency.NewTextMessage(agency.ToolRole, "42"), nil
 					},
 				},
 				// function with parameters
@@ -44,7 +44,7 @@ func main() {
 							return nil, err
 						}
 						return agency.NewTextMessage(
-							agency.AssistantRole,
+							agency.ToolRole,
 							fmt.Sprintf("%d", (pp.A+pp.B)*10),
 						), nil // *10 is just to distinguish from normal response
 					},

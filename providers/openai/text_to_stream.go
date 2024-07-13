@@ -11,61 +11,19 @@ import (
 )
 
 type TextToStreamParams struct {
-	Model               string
-	Temperature         NullableFloat32
-	MaxTokens           int
-	FuncDefs            []FuncDef
-	StreamHandler       func(delta, total string, isFirst, isLast bool) error
-	IsToolsCallRequired bool
-	Seed                *int
+	TextToTextParams
+	StreamHandler func(delta, total string, isFirst, isLast bool) error
 }
-
-var ToolAnswerAsModelsAnswer = errors.New("tool answer should be final")
 
 func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 	openAITools := castFuncDefsToOpenAITools(params.FuncDefs)
 
-	var toolChoice *string
-	if params.IsToolsCallRequired {
-		v := "required"
-		toolChoice = &v
-	}
-
 	return agency.NewOperation(
 		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
-			openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
-
-			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleSystem,
-				Content: cfg.Prompt,
-			})
-
-			for _, cfgMsg := range cfg.Messages {
-				openaiCfgMsg, err := messageToOpenAI(cfgMsg)
-				if err != nil {
-					return nil, fmt.Errorf("openAI msg mapping: %w", err)
-				}
-
-				openAIMessages = append(openAIMessages, openaiCfgMsg)
+			openAIMessages, err := agencyToOpenaiMessages(cfg, msg)
+			if err != nil {
+				return nil, fmt.Errorf("text to stream: %w", err)
 			}
-
-			openaiMsg := openai.ChatCompletionMessage{
-				Role: openai.ChatMessageRoleUser,
-			}
-
-			switch msg.Kind() {
-			case agency.TextKind:
-				openaiMsg.Content = string(msg.Content())
-			case agency.ImageKind:
-				openaiMsg.MultiContent = append(
-					openaiMsg.MultiContent,
-					openAIBase64ImageMessage(msg.Content()),
-				)
-			default:
-				return nil, fmt.Errorf("text to stream doesn't support %s kind", msg.Kind())
-			}
-
-			openAIMessages = append(openAIMessages, openaiMsg)
 
 			for { // streaming loop
 				openAIResponse, err := p.client.CreateChatCompletionStream(
@@ -77,11 +35,8 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						Messages:    openAIMessages,
 						Tools:       openAITools,
 						Stream:      params.StreamHandler != nil,
-						ToolChoice:  toolChoice,
-						StreamOptions: &openai.StreamOptions{
-							IncludeUsage: true,
-						},
-						Seed: params.Seed,
+						ToolChoice:  params.ToolCallRequired(),
+						Seed:        params.Seed,
 					},
 				)
 				if err != nil {
@@ -90,7 +45,6 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 
 				var content string
 				var accumulatedStreamedFunctions = make([]openai.ToolCall, 0, len(openAITools))
-				var usage openai.Usage
 				var isFirstDelta = true
 				var isLastDelta = false
 				var lastDelta string
@@ -109,13 +63,9 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 
 					if isLastDelta {
 						if len(accumulatedStreamedFunctions) == 0 {
-							// TODO update operation API and return usage along with message
-							_ = usage
-
-							return agency.NewMessage(
+							return agency.NewTextMessage(
 								agency.AssistantRole,
-								agency.TextKind,
-								[]byte(content),
+								content,
 							), nil
 						}
 
@@ -124,11 +74,6 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 
 					if err != nil {
 						return nil, err
-					}
-
-					if recv.Usage != nil { // penultimate message
-						usage = *recv.Usage
-						continue
 					}
 
 					if len(recv.Choices) < 1 {
@@ -169,37 +114,17 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 						ToolCalls: accumulatedStreamedFunctions,
 					})
 
-					for _, toolCall := range accumulatedStreamedFunctions {
-						funcToCall := getFuncDefByName(params.FuncDefs, toolCall.Function.Name)
-						if funcToCall == nil {
-							return nil, errors.New("function not found")
-						}
-
-						var funcResult agency.Message
-						funcResult, err = funcToCall.Body(ctx, []byte(toolCall.Function.Arguments))
-						var isFunctionCallAsModelAnswer = errors.Is(err, ToolAnswerAsModelsAnswer)
-						if err != nil && !isFunctionCallAsModelAnswer {
-							return nil, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
-						}
-
-						if funcResult == nil {
-							return nil, fmt.Errorf("tool response shouldn't be nil")
-						}
-
-						if isFunctionCallAsModelAnswer {
-							return funcResult, nil
-						}
-
-						var openaiFuncResult openai.ChatCompletionMessage
-						openaiFuncResult, err = messageToOpenAI(funcResult)
+					for _, call := range accumulatedStreamedFunctions {
+						toolResponse, err := callTool(ctx, call, params.FuncDefs)
 						if err != nil {
-							return nil, fmt.Errorf("openAI msg mapping: %w", err)
+							return nil, fmt.Errorf("text to text call tool: %w", err)
 						}
 
-						openaiFuncResult.ToolCallID = toolCall.ID
-						openaiFuncResult.Name = toolCall.Function.Name
+						if toolResponse.Role() != agency.ToolRole {
+							return toolResponse, nil
+						}
 
-						openAIMessages = append(openAIMessages, openaiFuncResult)
+						openAIMessages = append(openAIMessages, toolMessageToOpenAI(toolResponse, call.ID))
 					}
 				}
 
@@ -209,22 +134,28 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 	)
 }
 
-func messageToOpenAI(message agency.Message) (openai.ChatCompletionMessage, error) {
+func messageToOpenAI(message agency.Message) openai.ChatCompletionMessage {
 	wrappedMessage := openai.ChatCompletionMessage{
 		Role: string(message.Role()),
 	}
 
 	switch message.Kind() {
-	case agency.TextKind:
-		wrappedMessage.Content = string(message.Content())
+
 	case agency.ImageKind:
 		wrappedMessage.MultiContent = append(
 			wrappedMessage.MultiContent,
 			openAIBase64ImageMessage(message.Content()),
 		)
 	default:
-		return openai.ChatCompletionMessage{}, fmt.Errorf("text to stream doesn't support %s kind", message.Kind())
+		wrappedMessage.Content = string(message.Content())
 	}
 
-	return wrappedMessage, nil
+	return wrappedMessage
+}
+
+func toolMessageToOpenAI(message agency.Message, toolID string) openai.ChatCompletionMessage {
+	wrappedMessage := messageToOpenAI(message)
+	wrappedMessage.ToolCallID = toolID
+
+	return wrappedMessage
 }

@@ -16,19 +16,23 @@ func main() {
 	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	result, err := factory.
-		TextToStream(openai.TextToStreamParams{Model: goopenai.GPT3Dot5Turbo, StreamHandler: func(delta, total string, isFirst, isLast bool) error {
-			if isFirst {
-				fmt.Println("====Start streaming====")
-			}
+		TextToStream(openai.TextToStreamParams{
+			TextToTextParams: openai.TextToTextParams{
+				Model: goopenai.GPT3Dot5Turbo,
+			},
+			StreamHandler: func(delta, total string, isFirst, isLast bool) error {
+				if isFirst {
+					fmt.Println("====Start streaming====")
+				}
 
-			fmt.Print(delta)
+				fmt.Print(delta)
 
-			if isLast {
-				fmt.Println("\n====Finish streaming====")
-			}
+				if isLast {
+					fmt.Println("\n====Finish streaming====")
+				}
 
-			return nil
-		}}).
+				return nil
+			}}).
 		SetPrompt("Write a few sentences about topic").
 		Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.TextKind, []byte("I love programming.")))
 

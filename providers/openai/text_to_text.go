@@ -2,7 +2,6 @@ package openai
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -14,23 +13,22 @@ import (
 
 // TextToTextParams represents parameters that are specific for this operation.
 type TextToTextParams struct {
-	Model       string
-	Temperature NullableFloat32
-	MaxTokens   int
-	FuncDefs    []FuncDef
-	Seed        *int
+	Model               string
+	Temperature         NullableFloat32
+	MaxTokens           int
+	FuncDefs            []FuncDef
+	Seed                *int
+	IsToolsCallRequired bool
 }
 
-// FuncDef represents a function definition that can be called during the conversation.
-type FuncDef struct {
-	Name        string
-	Description string
-	// Parameters is an optional structure that defines the schema of the parameters that the function accepts.
-	Parameters *jsonschema.Definition
-	// Body is the actual function that get's called.
-	// Parameters passed are bytes that can be unmarshalled to type that implements provided json schema.
-	// Returned result must be anything that can be marshalled, including primitive values.
-	Body func(ctx context.Context, params []byte) (agency.Message, error)
+func (p TextToTextParams) ToolCallRequired() *string {
+	var toolChoice *string
+	if p.IsToolsCallRequired {
+		v := "required"
+		toolChoice = &v
+	}
+
+	return toolChoice
 }
 
 // TextToText is an operation builder that creates operation than can convert text to text.
@@ -40,24 +38,10 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 
 	return agency.NewOperation(
 		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
-			openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
-
-			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleSystem,
-				Content: cfg.Prompt,
-			})
-
-			for _, textMsg := range cfg.Messages {
-				openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-					Role:    string(textMsg.Role()),
-					Content: string(textMsg.Content()),
-				})
+			openAIMessages, err := agencyToOpenaiMessages(cfg, msg)
+			if err != nil {
+				return nil, fmt.Errorf("text to stream: %w", err)
 			}
-
-			openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleUser,
-				Content: string(msg.Content()),
-			})
 
 			for {
 				openAIResponse, err := p.client.CreateChatCompletion(
@@ -69,49 +53,35 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 						Messages:    openAIMessages,
 						Tools:       openAITools,
 						Seed:        params.Seed,
+						ToolChoice:  params.ToolCallRequired(),
 					},
 				)
 				if err != nil {
 					return nil, err
 				}
 
-				if len(openAIResponse.Choices) < 1 {
-					return nil, errors.New("no choice")
-				}
-				firstChoice := openAIResponse.Choices[0]
-
-				if len(firstChoice.Message.ToolCalls) == 0 {
-					return agency.NewMessage(
-						agency.Role(firstChoice.Message.Role),
-						agency.TextKind,
-						[]byte(firstChoice.Message.Content),
-					), nil
+				if len(openAIResponse.Choices) == 0 {
+					return nil, errors.New("get text to text response: no choice")
 				}
 
-				openAIMessages = append(openAIMessages, firstChoice.Message)
+				responseMessage := openAIResponse.Choices[0].Message
 
-				for _, toolCall := range firstChoice.Message.ToolCalls {
-					funcToCall := getFuncDefByName(params.FuncDefs, toolCall.Function.Name)
-					if funcToCall == nil {
-						return nil, errors.New("function not found")
-					}
+				if len(responseMessage.ToolCalls) == 0 {
+					return OpenaiToAgencyMessage(responseMessage), nil
+				}
 
-					funcResult, err := funcToCall.Body(ctx, []byte(toolCall.Function.Arguments))
+				openAIMessages = append(openAIMessages, responseMessage)
+				for _, call := range responseMessage.ToolCalls {
+					toolResponse, err := callTool(ctx, call, params.FuncDefs)
 					if err != nil {
-						return nil, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
+						return nil, fmt.Errorf("text to text call tool: %w", err)
 					}
 
-					bb, err := json.Marshal(funcResult)
-					if err != nil {
-						return nil, fmt.Errorf("marshal function result: %w", err)
+					if toolResponse.Role() != agency.ToolRole {
+						return toolResponse, nil
 					}
 
-					openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-						Role:       openai.ChatMessageRoleTool,
-						Content:    string(bb),
-						Name:       toolCall.Function.Name,
-						ToolCallID: toolCall.ID,
-					})
+					openAIMessages = append(openAIMessages, toolMessageToOpenAI(toolResponse, call.ID))
 				}
 			}
 		},
@@ -142,11 +112,60 @@ func castFuncDefsToOpenAITools(funcDefs []FuncDef) []openai.Tool {
 	return tools
 }
 
-func getFuncDefByName(funcDefs []FuncDef, name string) *FuncDef {
-	for _, f := range funcDefs {
-		if f.Name == name {
-			return &f
-		}
+func agencyToOpenaiMessages(cfg *agency.OperationConfig, msg agency.Message) ([]openai.ChatCompletionMessage, error) {
+	openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
+
+	openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleSystem,
+		Content: cfg.Prompt,
+	})
+
+	for _, cfgMsg := range cfg.Messages {
+		openAIMessages = append(openAIMessages, messageToOpenAI(cfgMsg))
 	}
-	return nil
+
+	openaiMsg := openai.ChatCompletionMessage{
+		Role: openai.ChatMessageRoleUser,
+	}
+
+	switch msg.Kind() {
+	case agency.TextKind:
+		openaiMsg.Content = string(msg.Content())
+	case agency.ImageKind:
+		openaiMsg.MultiContent = append(
+			openaiMsg.MultiContent,
+			openAIBase64ImageMessage(msg.Content()),
+		)
+	default:
+		return nil, fmt.Errorf("operator doesn't support %s kind", msg.Kind())
+	}
+
+	openAIMessages = append(openAIMessages, openaiMsg)
+
+	return openAIMessages, nil
+}
+
+func callTool(
+	ctx context.Context,
+	call openai.ToolCall,
+	defs FuncDefs,
+) (agency.Message, error) {
+	funcToCall := defs.getFuncDefByName(call.Function.Name)
+	if funcToCall == nil {
+		return nil, errors.New("function not found")
+	}
+
+	funcResult, err := funcToCall.Body(ctx, []byte(call.Function.Arguments))
+	if err != nil {
+		return funcResult, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
+	}
+
+	return funcResult, nil
+}
+
+func OpenaiToAgencyMessage(msg openai.ChatCompletionMessage) agency.Message {
+	return agency.NewTextMessage(
+		agency.Role(msg.Role),
+		msg.Content,
+	)
 }
