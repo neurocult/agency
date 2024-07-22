@@ -19,6 +19,7 @@ type TextToTextParams struct {
 	FuncDefs            []FuncDef
 	Seed                *int
 	IsToolsCallRequired bool
+	ShouldReturnJSON    bool
 }
 
 func (p TextToTextParams) ToolCallRequired() *string {
@@ -36,6 +37,13 @@ func (p TextToTextParams) ToolCallRequired() *string {
 func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 	openAITools := castFuncDefsToOpenAITools(params.FuncDefs)
 
+	var responseFormat openai.ChatCompletionResponseFormatType
+	if params.ShouldReturnJSON {
+		responseFormat = openai.ChatCompletionResponseFormatTypeJSONObject
+	} else {
+		responseFormat = openai.ChatCompletionResponseFormatTypeText
+	}
+
 	return agency.NewOperation(
 		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
 			openAIMessages, err := agencyToOpenaiMessages(cfg, msg)
@@ -47,13 +55,14 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 				openAIResponse, err := p.client.CreateChatCompletion(
 					ctx,
 					openai.ChatCompletionRequest{
-						Model:       params.Model,
-						Temperature: nullableToFloat32(params.Temperature),
-						MaxTokens:   params.MaxTokens,
-						Messages:    openAIMessages,
-						Tools:       openAITools,
-						Seed:        params.Seed,
-						ToolChoice:  params.ToolCallRequired(),
+						Model:          params.Model,
+						Temperature:    nullableToFloat32(params.Temperature),
+						MaxTokens:      params.MaxTokens,
+						Messages:       openAIMessages,
+						Tools:          openAITools,
+						Seed:           params.Seed,
+						ToolChoice:     params.ToolCallRequired(),
+						ResponseFormat: &openai.ChatCompletionResponseFormat{Type: responseFormat},
 					},
 				)
 				if err != nil {
