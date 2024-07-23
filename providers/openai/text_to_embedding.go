@@ -14,12 +14,24 @@ type EmbeddingModel = openai.EmbeddingModel
 const AdaEmbeddingV2 EmbeddingModel = openai.AdaEmbeddingV2
 
 type TextToEmbeddingParams struct {
-	Model EmbeddingModel
+	Model      EmbeddingModel
+	Dimensions EmbeddingDimensions
+}
+
+type EmbeddingDimensions *int
+
+func NewDimensions(v int) EmbeddingDimensions {
+	return &v
 }
 
 func (p Provider) TextToEmbedding(params TextToEmbeddingParams) *agency.Operation {
+	var dimensions int
+	if params.Dimensions != nil {
+		dimensions = *params.Dimensions
+	}
+
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
-		//TODO: we have to convert string to model and then model to string. Can we optimize it?
+		// TODO: we have to convert string to model and then model to string. Can we optimize it?
 		messages := append(cfg.Messages, msg)
 		texts := make([]string, len(messages))
 
@@ -30,8 +42,9 @@ func (p Provider) TextToEmbedding(params TextToEmbeddingParams) *agency.Operatio
 		resp, err := p.client.CreateEmbeddings(
 			ctx,
 			openai.EmbeddingRequest{
-				Input: texts,
-				Model: params.Model,
+				Input:      texts,
+				Model:      params.Model,
+				Dimensions: dimensions,
 			},
 		)
 		if err != nil {
@@ -48,7 +61,7 @@ func (p Provider) TextToEmbedding(params TextToEmbeddingParams) *agency.Operatio
 			return nil, fmt.Errorf("failed to convert embedding to bytes: %w", err)
 		}
 
-		//TODO: we have to convert []float32 to []byte. Can we optimize it?
+		// TODO: we have to convert []float32 to []byte. Can we optimize it?
 		return agency.NewMessage(agency.AssistantRole, agency.EmbeddingKind, bytes), nil
 	})
 }
