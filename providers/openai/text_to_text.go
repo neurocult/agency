@@ -19,7 +19,7 @@ type TextToTextParams struct {
 	FuncDefs            []FuncDef
 	Seed                *int
 	IsToolsCallRequired bool
-	ShouldReturnJSON    bool
+	Format              *openai.ChatCompletionResponseFormat
 }
 
 func (p TextToTextParams) ToolCallRequired() *string {
@@ -36,13 +36,6 @@ func (p TextToTextParams) ToolCallRequired() *string {
 // It can also call provided functions if needed, as many times as needed until the final answer is generated.
 func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 	openAITools := castFuncDefsToOpenAITools(params.FuncDefs)
-
-	var responseFormat openai.ChatCompletionResponseFormatType
-	if params.ShouldReturnJSON {
-		responseFormat = openai.ChatCompletionResponseFormatTypeJSONObject
-	} else {
-		responseFormat = openai.ChatCompletionResponseFormatTypeText
-	}
 
 	return agency.NewOperation(
 		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
@@ -62,7 +55,7 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 						Tools:          openAITools,
 						Seed:           params.Seed,
 						ToolChoice:     params.ToolCallRequired(),
-						ResponseFormat: &openai.ChatCompletionResponseFormat{Type: responseFormat},
+						ResponseFormat: params.Format,
 					},
 				)
 				if err != nil {

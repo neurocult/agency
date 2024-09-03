@@ -29,14 +29,15 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 				openAIResponse, err := p.client.CreateChatCompletionStream(
 					ctx,
 					openai.ChatCompletionRequest{
-						Model:       params.Model,
-						Temperature: nullableToFloat32(params.Temperature),
-						MaxTokens:   params.MaxTokens,
-						Messages:    openAIMessages,
-						Tools:       openAITools,
-						Stream:      params.StreamHandler != nil,
-						ToolChoice:  params.ToolCallRequired(),
-						Seed:        params.Seed,
+						Model:          params.Model,
+						Temperature:    nullableToFloat32(params.Temperature),
+						MaxTokens:      params.MaxTokens,
+						Messages:       openAIMessages,
+						Tools:          openAITools,
+						Stream:         params.StreamHandler != nil,
+						ToolChoice:     params.ToolCallRequired(),
+						Seed:           params.Seed,
+						ResponseFormat: params.Format,
 					},
 				)
 				if err != nil {
