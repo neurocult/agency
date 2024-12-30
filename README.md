@@ -34,7 +34,7 @@ import (
 func main() {
 	assistant := openai.
 		New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")}).
-		TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).
+		TextToText(openai.TextToTextParams{Model: "gpt-4o-mini"}).
 		SetPrompt("You are helpful assistant.")
 
 	messages := []agency.Message{}

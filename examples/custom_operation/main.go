@@ -12,14 +12,22 @@ func main() {
 	increment := agency.NewOperation(incrementFunc)
 
 	msg, err := agency.NewProcess(
-		increment, increment, increment,
-	).Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.TextKind, []byte("0")))
-
+		increment,
+		increment,
+		increment,
+	).Execute(
+		context.Background(),
+		agency.NewMessage(
+			agency.UserRole,
+			agency.TextKind,
+			[]byte("0"),
+		),
+	)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(msg)
+	fmt.Println(string(msg.Content()))
 }
 
 func incrementFunc(ctx context.Context, msg agency.Message, _ *agency.OperationConfig) (agency.Message, error) {

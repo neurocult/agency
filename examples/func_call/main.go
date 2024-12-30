@@ -7,6 +7,7 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
+	go_openai "github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/neurocult/agency"
@@ -17,13 +18,14 @@ func main() {
 	t2tOp := openai.
 		New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")}).
 		TextToText(openai.TextToTextParams{
-			Model: "gpt-3.5-turbo",
+			Model: go_openai.GPT4oMini,
 			FuncDefs: []openai.FuncDef{
 				// function without parameters
 				{
 					Name:        "GetMeaningOfLife",
 					Description: "Answer questions about meaning of life",
 					Body: func(ctx context.Context, _ []byte) (agency.Message, error) {
+						// because we don't need any arguments
 						return agency.NewTextMessage(agency.ToolRole, "42"), nil
 					},
 				},
@@ -96,5 +98,10 @@ Examples:
 }
 
 func printAnswer(message agency.Message) {
-	fmt.Printf("Role: %s; Type: %s; Data: %s\n", message.Role(), message.Kind(), agency.GetStringContent(message))
+	fmt.Printf(
+		"Role: %s; Type: %s; Data: %s\n",
+		message.Role(),
+		message.Kind(),
+		string(message.Content()),
+	)
 }

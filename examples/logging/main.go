@@ -13,7 +13,7 @@ import (
 
 func main() {
 	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
-	params := openai.TextToTextParams{Model: "gpt-3.5-turbo"}
+	params := openai.TextToTextParams{Model: "gpt-4o-mini"}
 
 	_, err := agency.NewProcess(
 		factory.TextToText(params).SetPrompt("explain what that means"),

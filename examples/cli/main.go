@@ -13,13 +13,13 @@ import (
 )
 
 // usage example: go to the repo root and execute
-// go run examples/cli/main.go -prompt "You are professional translator, translate everything you see to Russian" -model "gpt-3.5-turbo" -maxTokens=1000 "I love winter"
+// go run examples/cli/main.go -prompt "You are professional translator, translate everything you see to Russian" -model "gpt-4o-mini" -maxTokens=1000 "I love winter"
 func main() {
 	provider := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	temp := flag.Float64("temp", 0.0, "Temperature value")
 	maxTokens := flag.Int("maxTokens", 0, "Maximum number of tokens")
-	model := flag.String("model", "gpt-3.5-turbo", "Model name")
+	model := flag.String("model", "gpt-4o-mini", "Model name")
 	prompt := flag.String("prompt", "You are a helpful assistant", "System message")
 
 	flag.Parse()
@@ -45,5 +45,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println(result)
+	fmt.Println(result.Content())
 }

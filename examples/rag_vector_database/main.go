@@ -27,7 +27,7 @@ func main() {
 
 	factory := openai.New(openai.Params{Key: openAPIKey})
 	retrieve := RAGoperation(client)
-	summarize := factory.TextToText(openai.TextToTextParams{Model: "gpt-3.5-turbo"}).SetPrompt("summarize")
+	summarize := factory.TextToText(openai.TextToTextParams{Model: "gpt-4o-mini"}).SetPrompt("summarize")
 	voice := factory.TextToSpeech(openai.TextToSpeechParams{
 		Model: "tts-1", ResponseFormat: "mp3", Speed: 1, Voice: "onyx",
 	})

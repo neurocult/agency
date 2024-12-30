@@ -74,11 +74,3 @@ func NewJsonMessage(role Role, content any) (BaseMessage, error) {
 		kind:    TextKind,
 	}, nil
 }
-
-func GetStringContent(msg Message) string {
-	if msg.Kind() == TextKind {
-		return string(msg.Content())
-	}
-
-	return ""
-}
