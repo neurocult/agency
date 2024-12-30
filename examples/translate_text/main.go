@@ -16,9 +16,16 @@ func main() {
 	factory := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")})
 
 	result, err := factory.
-		TextToText(openai.TextToTextParams{Model: goopenai.GPT3Dot5Turbo}).
+		TextToText(openai.TextToTextParams{Model: goopenai.GPT4oMini}).
 		SetPrompt("You are a helpful assistant that translates English to French").
-		Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.TextKind, []byte("I love programming.")))
+		Execute(
+			context.Background(),
+			agency.NewMessage(
+				agency.UserRole,
+				agency.TextKind,
+				[]byte("I love programming."),
+			),
+		)
 
 	if err != nil {
 		panic(err)

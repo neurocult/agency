@@ -17,25 +17,27 @@ func main() {
 
 	result, err := factory.
 		TextToStream(openai.TextToStreamParams{
-			TextToTextParams: openai.TextToTextParams{
-				Model: goopenai.GPT3Dot5Turbo,
-			},
+			TextToTextParams: openai.TextToTextParams{Model: goopenai.GPT4oMini},
 			StreamHandler: func(delta, total string, isFirst, isLast bool) error {
 				if isFirst {
 					fmt.Println("====Start streaming====")
 				}
-
 				fmt.Print(delta)
-
 				if isLast {
 					fmt.Println("\n====Finish streaming====")
 				}
-
 				return nil
-			}}).
+			},
+		}).
 		SetPrompt("Write a few sentences about topic").
-		Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.TextKind, []byte("I love programming.")))
-
+		Execute(
+			context.Background(),
+			agency.NewMessage(
+				agency.UserRole,
+				agency.TextKind,
+				[]byte("I love programming."),
+			),
+		)
 	if err != nil {
 		panic(err)
 	}

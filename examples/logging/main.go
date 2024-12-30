@@ -32,5 +32,10 @@ func main() {
 }
 
 func Logger(input, output agency.Message, cfg *agency.OperationConfig) {
-	fmt.Printf("in: %v\nprompt: %v\nout: %v\n\n", input, cfg.Prompt, output)
+	fmt.Printf(
+		"in: %v\nprompt: %v\nout: %v\n\n",
+		string(input.Content()),
+		cfg.Prompt,
+		string(output.Content()),
+	)
 }

@@ -11,8 +11,8 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-func main() {
-	imgBytes, err := os.ReadFile("../example.png")
+func main() { 
+	imgBytes, err := os.ReadFile("example.png")
 	if err != nil {
 		panic(err)
 	}
@@ -28,5 +28,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(result)
+	fmt.Println(string(result.Content()))
 }
