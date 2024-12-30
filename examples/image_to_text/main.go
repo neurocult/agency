@@ -7,8 +7,8 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/neurocult/agency"
-
-	"github.com/neurocult/agency/providers/openai"
+	openAIProvider "github.com/neurocult/agency/providers/openai"
+	"github.com/sashabaranov/go-openai"
 )
 
 func main() {
@@ -17,8 +17,8 @@ func main() {
 		panic(err)
 	}
 
-	result, err := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")}).
-		ImageToText(openai.ImageToTextParams{MaxTokens: 300}).
+	result, err := openAIProvider.New(openAIProvider.Params{Key: os.Getenv("OPENAI_API_KEY")}).
+		ImageToText(openAIProvider.ImageToTextParams{Model: openai.GPT4o, MaxTokens: 300}).
 		SetPrompt("describe what you see").
 		Execute(
 			context.Background(),
