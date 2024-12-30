@@ -49,13 +49,13 @@ func main() {
 			panic(err)
 		}
 
-		input := agency.UserMessage(text)
+		input := agency.NewTextMessage(agency.UserRole, text)
 		answer, err := assistant.SetMessages(messages).Execute(ctx, input)
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Println("Assistant: ", answer)
+		fmt.Println("Assistant:", string(answer.Content()))
 
 		messages = append(messages, input, answer)
 	}
@@ -98,9 +98,9 @@ Our goal is to fill this gap with a Go-centric library that emphasizes clean, si
 
 In the next versions:
 
-- [ ] Support for external function calls
+- [x] Support for external function calls
 - [ ] Metadata (tokens used, audio duration, etc)
 - [ ] More provider-adapters, not only openai
-- [ ] Image to text operations
+- [x] Image to text operations
 - [ ] Powerful API for autonomous agents
 - [ ] Tagging and JSON output parser

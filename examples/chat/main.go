@@ -30,7 +30,7 @@ func main() {
 			panic(err)
 		}
 
-		input := agency.NewMessage(agency.UserRole, agency.TextKind, []byte(text))
+		input := agency.NewTextMessage(agency.UserRole, text)
 		answer, err := assistant.SetMessages(messages).Execute(ctx, input)
 		if err != nil {
 			panic(err)
