@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
 
 	"github.com/neurocult/agency"
 )
@@ -104,10 +103,6 @@ func castFuncDefsToOpenAITools(funcDefs []FuncDef) []openai.Tool {
 		}
 		if f.Parameters != nil {
 			tool.Function.Parameters = f.Parameters
-		} else {
-			tool.Function.Parameters = jsonschema.Definition{
-				Type: jsonschema.Object, // because we can't pass empty parameters
-			}
 		}
 		tools = append(tools, tool)
 	}
