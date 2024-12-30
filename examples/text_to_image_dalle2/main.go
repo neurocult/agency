@@ -26,7 +26,7 @@ func main() {
 		Style:     "vivid",
 	}).Execute(
 		context.Background(),
-		agency.UserMessage("Halloween night at a haunted museum"),
+		agency.NewMessage(agency.UserRole, agency.TextKind, []byte("Halloween night at a haunted museum")),
 	)
 	if err != nil {
 		panic(err)
@@ -40,7 +40,7 @@ func main() {
 }
 
 func saveToDisk(msg agency.Message) error {
-	r := bytes.NewReader(msg.Content)
+	r := bytes.NewReader(msg.Content())
 
 	// for dall-e-3 use third party libraries due to lack of webp support in go stdlib
 	imgData, format, err := image.Decode(r)

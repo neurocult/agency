@@ -6,14 +6,13 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
-
 	"github.com/neurocult/agency"
 	openAIProvider "github.com/neurocult/agency/providers/openai"
 	"github.com/sashabaranov/go-openai"
 )
 
 func main() {
-	imgBytes, err := os.ReadFile("example.png")
+	imgBytes, err := os.ReadFile("../example.png")
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +22,7 @@ func main() {
 		SetPrompt("describe what you see").
 		Execute(
 			context.Background(),
-			agency.Message{Content: imgBytes},
+			agency.NewMessage(agency.UserRole, agency.ImageKind, imgBytes),
 		)
 	if err != nil {
 		panic(err)

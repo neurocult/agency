@@ -35,13 +35,13 @@ func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
 		for _, cfgMsg := range cfg.Messages {
 			openaiMsg.MultiContent = append(
 				openaiMsg.MultiContent,
-				openAIBase64ImageMessage(cfgMsg.Content),
+				openAIBase64ImageMessage(cfgMsg.Content()),
 			)
 		}
 
 		openaiMsg.MultiContent = append(
 			openaiMsg.MultiContent,
-			openAIBase64ImageMessage(msg.Content),
+			openAIBase64ImageMessage(msg.Content()),
 		)
 
 		resp, err := f.client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
@@ -54,18 +54,15 @@ func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
 			PresencePenalty:  nullableToFloat32(params.PresencePenalty),
 		})
 		if err != nil {
-			return agency.Message{}, err
+			return nil, err
 		}
 
 		if len(resp.Choices) < 1 {
-			return agency.Message{}, errors.New("no choice")
+			return nil, errors.New("no choice")
 		}
 		choice := resp.Choices[0].Message
 
-		return agency.Message{
-			Role:    agency.AssistantRole,
-			Content: []byte(choice.Content),
-		}, nil
+		return agency.NewMessage(agency.AssistantRole, agency.TextKind, []byte(choice.Content)), nil
 	})
 }
 

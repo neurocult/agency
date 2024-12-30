@@ -52,7 +52,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	speechMsg := agency.Message{Content: sound}
+	speechMsg := agency.NewMessage(agency.UserRole, agency.VoiceKind, sound)
 
 	_, err = agency.NewProcess(
 		hear,
@@ -64,6 +64,6 @@ func main() {
 	}
 
 	for _, msg := range saver {
-		fmt.Println(msg.String())
+		fmt.Println(string(msg.Content()))
 	}
 }

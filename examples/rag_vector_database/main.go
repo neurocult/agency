@@ -6,11 +6,11 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/neurocult/agency"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate"
 	"github.com/weaviate/weaviate-go-client/v4/weaviate/graphql"
 	"github.com/weaviate/weaviate/entities/models"
 
-	"github.com/neurocult/agency"
 	"github.com/neurocult/agency/providers/openai"
 )
 
@@ -36,7 +36,7 @@ func main() {
 		retrieve,
 		summarize,
 		voice,
-	).Execute(ctx, agency.UserMessage("programming"))
+	).Execute(ctx, agency.NewMessage(agency.UserRole, agency.TextKind, []byte("programming")))
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +49,7 @@ func main() {
 // RAGoperation retrieves relevant objects from vector store and builds a text message to pass further to the process
 func RAGoperation(client *weaviate.Client) *agency.Operation {
 	return agency.NewOperation(func(ctx context.Context, msg agency.Message, po *agency.OperationConfig) (agency.Message, error) {
-		input := msg.String()
+		input := string(msg.Content())
 
 		result, err := client.GraphQL().Get().
 			WithClassName("Records").
@@ -71,15 +71,16 @@ func RAGoperation(client *weaviate.Client) *agency.Operation {
 		for _, obj := range result.Data {
 			bb, err := json.Marshal(&obj)
 			if err != nil {
-				return agency.Message{}, err
+				return nil, err
 			}
 			content += string(bb)
 		}
 
-		return agency.Message{
-			Role:    agency.AssistantRole,
-			Content: []byte(content),
-		}, nil
+		return agency.NewMessage(
+			agency.AssistantRole,
+			agency.TextKind,
+			[]byte(content),
+		), nil
 	})
 }
 
@@ -125,7 +126,7 @@ func saveToDisk(msg agency.Message) error {
 	}
 	defer file.Close()
 
-	_, err = file.Write(msg.Content)
+	_, err = file.Write(msg.Content())
 	if err != nil {
 		return err
 	}

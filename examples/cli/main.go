@@ -38,7 +38,7 @@ func main() {
 			MaxTokens:   *maxTokens,
 		}).
 		SetPrompt(*prompt).
-		Execute(context.Background(), agency.UserMessage(content))
+		Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.TextKind, []byte(content)))
 
 	if err != nil {
 		fmt.Println(err)

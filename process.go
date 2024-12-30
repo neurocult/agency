@@ -26,7 +26,7 @@ func (p *Process) Execute(ctx context.Context, input Message, interceptors ...In
 	for _, operation := range p.operations {
 		output, err := operation.Execute(ctx, input)
 		if err != nil {
-			return Message{}, err
+			return nil, err
 		}
 
 		// FIXME while these are called AFTER operation and not before it's impossible to modify configuration

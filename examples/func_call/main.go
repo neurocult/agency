@@ -23,8 +23,8 @@ func main() {
 				{
 					Name:        "GetMeaningOfLife",
 					Description: "Answer questions about meaning of life",
-					Body: func(ctx context.Context, _ []byte) (any, error) {
-						return 42, nil
+					Body: func(ctx context.Context, _ []byte) (agency.Message, error) {
+						return agency.NewTextMessage(agency.ToolRole, "42"), nil
 					},
 				},
 				// function with parameters
@@ -38,12 +38,15 @@ func main() {
 							"b": {Type: "integer"},
 						},
 					},
-					Body: func(ctx context.Context, params []byte) (any, error) {
+					Body: func(ctx context.Context, params []byte) (agency.Message, error) {
 						var pp struct{ A, B int }
 						if err := json.Unmarshal(params, &pp); err != nil {
 							return nil, err
 						}
-						return (pp.A + pp.B) * 10, nil // *10 is just to distinguish from normal response
+						return agency.NewTextMessage(
+							agency.ToolRole,
+							fmt.Sprintf("%d", (pp.A+pp.B)*10),
+						), nil // *10 is just to distinguish from normal response
 					},
 				},
 			},
@@ -64,30 +67,34 @@ Examples:
 	// test for first function call
 	answer, err := t2tOp.Execute(
 		ctx,
-		agency.UserMessage("what is the meaning of life?"),
+		agency.NewMessage(agency.UserRole, agency.TextKind, []byte("what is the meaning of life?")),
 	)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(answer)
+	printAnswer(answer)
 
 	// test for second function call
 	answer, err = t2tOp.Execute(
 		ctx,
-		agency.UserMessage("1+1?"),
+		agency.NewMessage(agency.UserRole, agency.TextKind, []byte("1+1?")),
 	)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(answer)
+	printAnswer(answer)
 
 	// test for both function calls at the same time
 	answer, err = t2tOp.Execute(
 		ctx,
-		agency.UserMessage("1+1 and what is the meaning of life?"),
+		agency.NewMessage(agency.UserRole, agency.TextKind, []byte("1+1 and what is the meaning of life?")),
 	)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(answer)
+	printAnswer(answer)
+}
+
+func printAnswer(message agency.Message) {
+	fmt.Printf("Role: %s; Type: %s; Data: %s\n", message.Role(), message.Kind(), agency.GetStringContent(message))
 }

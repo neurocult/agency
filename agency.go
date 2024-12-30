@@ -37,7 +37,7 @@ func NewOperation(handler OperationHandler) *Operation {
 func (p *Operation) Execute(ctx context.Context, input Message) (Message, error) {
 	output, err := p.handler(ctx, input, p.config)
 	if err != nil {
-		return Message{}, err
+		return nil, err
 	}
 	return output, nil
 }

@@ -21,17 +21,14 @@ func (f Provider) SpeechToText(params SpeechToTextParams) *agency.Operation {
 				Model:       params.Model,
 				Prompt:      cfg.Prompt,
 				FilePath:    "speech.ogg",
-				Reader:      bytes.NewReader(msg.Content),
+				Reader:      bytes.NewReader(msg.Content()),
 				Temperature: nullableToFloat32(params.Temperature),
 			})
 			if err != nil {
-				return agency.Message{}, err
+				return nil, err
 			}
 
-			return agency.Message{
-				Role:    agency.AssistantRole,
-				Content: []byte(resp.Text),
-			}, nil
+			return agency.NewMessage(agency.AssistantRole, agency.TextKind, []byte(resp.Text)), nil
 		},
 	)
 }
