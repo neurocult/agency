@@ -3,7 +3,7 @@ module github.com/neurocult/agency
 go 1.21.0
 
 require (
-	github.com/sashabaranov/go-openai v1.21.0
+	github.com/sashabaranov/go-openai v1.36.1
 	github.com/weaviate/weaviate v1.24.8
 	github.com/weaviate/weaviate-go-client/v4 v4.13.1
 )
