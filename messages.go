@@ -55,6 +55,9 @@ func (m ImageMessage) Kind() Kind          { return ImageKind }
 func (m ImageMessage) Content() []byte     { return m.content }
 func (m ImageMessage) Description() string { return m.description }
 
+// NewImageMessage creates new image message.
+// Empty byte slice is NOT a valid content.
+// Empty string IS valid description.
 func NewImageMessage(role Role, content []byte, description string) ImageMessage {
 	return ImageMessage{
 		content:     content,
