@@ -32,16 +32,16 @@ func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
 			Text: cfg.Prompt,
 		})
 
-		for _, cfgMsg := range cfg.Messages {
+		for _, msgFromCfg := range cfg.Messages {
 			openaiMsg.MultiContent = append(
 				openaiMsg.MultiContent,
-				openAIBase64ImageMessage(cfgMsg.Content()),
+				bytesToOpenAIMessagePart(msgFromCfg),
 			)
 		}
 
 		openaiMsg.MultiContent = append(
 			openaiMsg.MultiContent,
-			openAIBase64ImageMessage(msg.Content()),
+			bytesToOpenAIMessagePart(msg),
 		)
 
 		resp, err := f.client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
@@ -62,17 +62,22 @@ func (f *Provider) ImageToText(params ImageToTextParams) *agency.Operation {
 		}
 		choice := resp.Choices[0].Message
 
-		return agency.NewMessage(agency.AssistantRole, agency.TextKind, []byte(choice.Content)), nil
+		return agency.NewTextMessage(agency.AssistantRole, choice.Content), nil
 	})
 }
 
-func openAIBase64ImageMessage(bb []byte) openai.ChatMessagePart {
-	imgBase64Str := base64.StdEncoding.EncodeToString(bb)
+func bytesToOpenAIMessagePart(msg agency.Message) openai.ChatMessagePart {
+	imgMsg := msg.(agency.ImageMessage) // panic if given msg is not image
+
 	return openai.ChatMessagePart{
 		Type: openai.ChatMessagePartTypeImageURL,
 		ImageURL: &openai.ChatMessageImageURL{
-			URL:    fmt.Sprintf("data:image/jpeg;base64,%s", imgBase64Str),
+			URL: fmt.Sprintf(
+				"data:image/jpeg;base64,%s",
+				base64.StdEncoding.EncodeToString(imgMsg.Content()),
+			),
 			Detail: openai.ImageURLDetailAuto,
 		},
+		Text: imgMsg.Description(),
 	}
 }

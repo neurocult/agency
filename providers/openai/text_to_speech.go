@@ -35,7 +35,7 @@ func (f Provider) TextToSpeech(params TextToSpeechParams) *agency.Operation {
 				return nil, err
 			}
 
-			return agency.NewMessage(agency.AssistantRole, agency.VoiceKind, bb), nil
+			return agency.NewVoiceMessage(agency.AssistantRole, bb), nil
 		},
 	)
 }

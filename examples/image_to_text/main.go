@@ -11,7 +11,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-func main() { 
+func main() {
 	imgBytes, err := os.ReadFile("example.png")
 	if err != nil {
 		panic(err)
@@ -22,7 +22,7 @@ func main() {
 		SetPrompt("describe what you see").
 		Execute(
 			context.Background(),
-			agency.NewMessage(agency.UserRole, agency.ImageKind, imgBytes),
+			agency.NewImageMessage(agency.UserRole, imgBytes, ""),
 		)
 	if err != nil {
 		panic(err)

@@ -26,7 +26,7 @@ func main() {
 		Model: goopenai.Whisper1,
 	}).Execute(
 		context.Background(),
-		agency.NewMessage(agency.UserRole, agency.VoiceKind, data),
+		agency.NewVoiceMessage(agency.UserRole, data),
 	)
 
 	if err != nil {

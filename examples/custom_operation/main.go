@@ -17,11 +17,7 @@ func main() {
 		increment,
 	).Execute(
 		context.Background(),
-		agency.NewMessage(
-			agency.UserRole,
-			agency.TextKind,
-			[]byte("0"),
-		),
+		agency.NewTextMessage(agency.UserRole, "0"),
 	)
 	if err != nil {
 		panic(err)
@@ -36,5 +32,5 @@ func incrementFunc(ctx context.Context, msg agency.Message, _ *agency.OperationC
 		return nil, err
 	}
 	inc := strconv.Itoa(int(i) + 1)
-	return agency.NewMessage(agency.ToolRole, agency.TextKind, []byte(inc)), nil
+	return agency.NewTextMessage(agency.ToolRole, inc), nil
 }

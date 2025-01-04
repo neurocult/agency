@@ -27,7 +27,7 @@ func main() {
 		SetPrompt("describe what you see").
 		Execute(
 			context.Background(),
-			agency.NewMessage(agency.UserRole, agency.ImageKind, imgBytes),
+			agency.NewImageMessage(agency.UserRole, imgBytes, ""),
 		)
 	if err != nil {
 		panic(err)

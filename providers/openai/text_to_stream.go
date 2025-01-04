@@ -20,7 +20,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 
 	return agency.NewOperation(
 		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
-			openAIMessages, err := agencyToOpenaiMessages(cfg, msg)
+			openAIMessages, err := agencyToOpenAIMessages(cfg, msg)
 			if err != nil {
 				return nil, fmt.Errorf("text to stream: %w", err)
 			}
@@ -47,7 +47,7 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 				var content string
 				var accumulatedStreamedFunctions = make([]openai.ToolCall, 0, len(openAITools))
 				var isFirstDelta = true
-				var isLastDelta = false
+				var isLastDelta bool
 				var lastDelta string
 
 				for {
@@ -129,34 +129,10 @@ func (p Provider) TextToStream(params TextToStreamParams) *agency.Operation {
 					}
 				}
 
-				openAIResponse.Close()
+				if err := openAIResponse.Close(); err != nil {
+					return nil, err
+				}
 			}
 		},
 	)
-}
-
-func messageToOpenAI(message agency.Message) openai.ChatCompletionMessage {
-	wrappedMessage := openai.ChatCompletionMessage{
-		Role: string(message.Role()),
-	}
-
-	switch message.Kind() {
-
-	case agency.ImageKind:
-		wrappedMessage.MultiContent = append(
-			wrappedMessage.MultiContent,
-			openAIBase64ImageMessage(message.Content()),
-		)
-	default:
-		wrappedMessage.Content = string(message.Content())
-	}
-
-	return wrappedMessage
-}
-
-func toolMessageToOpenAI(message agency.Message, toolID string) openai.ChatCompletionMessage {
-	wrappedMessage := messageToOpenAI(message)
-	wrappedMessage.ToolCallID = toolID
-
-	return wrappedMessage
 }

@@ -4,6 +4,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+
+	"github.com/neurocult/agency"
+	"github.com/sashabaranov/go-openai"
 )
 
 type Embedding []float32
@@ -70,4 +73,35 @@ func nullableToFloat32(v NullableFloat32) float32 {
 		return math.SmallestNonzeroFloat32
 	}
 	return *v
+}
+
+// textMessageToOpenAI works with any agency message but ignores everything except role and content.
+func textMessageToOpenAI(message agency.Message) openai.ChatCompletionMessage {
+	return openai.ChatCompletionMessage{
+		Role:    string(message.Role()),
+		Content: string(message.Content()),
+	}
+}
+
+// agencyToOpenAIMessages returns slice of openai chat completion messages created from given config and message.
+// Resulting slices starts with config prompt followed by config messages and ends with given message.
+func agencyToOpenAIMessages(cfg *agency.OperationConfig, msg agency.Message) ([]openai.ChatCompletionMessage, error) {
+	openAIMessages := append(
+		make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2),
+		openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: cfg.Prompt,
+		},
+	)
+
+	for _, cfgMsg := range cfg.Messages {
+		openAIMessages = append(openAIMessages, textMessageToOpenAI(cfgMsg))
+	}
+
+	openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
+		Role:    string(msg.Role()),
+		Content: string(msg.Content()),
+	})
+
+	return openAIMessages, nil
 }

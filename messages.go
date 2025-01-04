@@ -1,11 +1,9 @@
 package agency
 
-import "encoding/json"
-
 type Message interface {
 	Role() Role
 	Content() []byte
-	Kind() Kind
+	Kind() Kind // do we need this?
 }
 
 type Kind string
@@ -26,51 +24,77 @@ const (
 	ToolRole      Role = "tool"
 )
 
-type BaseMessage struct {
-	content []byte
+// --- Text Message ---
+
+type TextMessage struct {
 	role    Role
-	kind    Kind
+	content string
 }
 
-func (bm BaseMessage) Role() Role {
-	return bm.role
-}
+func (m TextMessage) Role() Role      { return m.role }
+func (m TextMessage) Kind() Kind      { return TextKind }
+func (m TextMessage) Content() []byte { return []byte(m.content) }
 
-func (bm BaseMessage) Kind() Kind {
-	return bm.kind
-}
-func (bm BaseMessage) Content() []byte {
-	return bm.content
-}
-
-// NewMessage creates new `Message` with the specified `Role` and `Kind`
-func NewMessage(role Role, kind Kind, content []byte) BaseMessage {
-	return BaseMessage{
+func NewTextMessage(role Role, content string) TextMessage {
+	return TextMessage{
 		content: content,
 		role:    role,
-		kind:    kind,
 	}
 }
 
-// NewTextMessage creates new `Message` with Text kind and the specified `Role`
-func NewTextMessage(role Role, content string) BaseMessage {
-	return BaseMessage{
-		content: []byte(content),
-		role:    role,
-		kind:    TextKind,
+// --- Image Message ---
+
+type ImageMessage struct {
+	role        Role
+	content     []byte
+	description string
+}
+
+func (m ImageMessage) Role() Role          { return m.role }
+func (m ImageMessage) Kind() Kind          { return ImageKind }
+func (m ImageMessage) Content() []byte     { return m.content }
+func (m ImageMessage) Description() string { return m.description }
+
+func NewImageMessage(role Role, content []byte, description string) ImageMessage {
+	return ImageMessage{
+		content:     content,
+		description: description,
+		role:        role,
 	}
 }
 
-// NewJsonMessage marshals content and creates new `Message` with text kind and the specified `Role`
-func NewJsonMessage(role Role, content any) (BaseMessage, error) {
-	data, err := json.Marshal(content)
-	if err != nil {
-		return BaseMessage{}, err
-	}
+// --- Voice Message ---
 
-	return BaseMessage{
-		content: data,
+type VoiceMessage struct {
+	role    Role
+	content []byte
+}
+
+func (m VoiceMessage) Role() Role      { return m.role }
+func (m VoiceMessage) Kind() Kind      { return VoiceKind }
+func (m VoiceMessage) Content() []byte { return m.content }
+
+func NewVoiceMessage(role Role, content []byte) VoiceMessage {
+	return VoiceMessage{
+		content: content,
 		role:    role,
-		kind:    TextKind,
-	}, nil
+	}
+}
+
+// --- Embedding Message ---
+
+type EmbeddingMessage struct {
+	role    Role
+	content []byte
+}
+
+func (m EmbeddingMessage) Role() Role      { return m.role }
+func (m EmbeddingMessage) Kind() Kind      { return EmbeddingKind }
+func (m EmbeddingMessage) Content() []byte { return m.content }
+
+func NewEmbeddingMessage(role Role, content []byte) EmbeddingMessage {
+	return EmbeddingMessage{
+		content: content,
+		role:    role,
+	}
 }

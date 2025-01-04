@@ -40,7 +40,7 @@ func (p Provider) TextToImage(params TextToImageParams) *agency.Operation {
 				return nil, err
 			}
 
-			return agency.NewMessage(agency.AssistantRole, agency.ImageKind, imgBytes), nil
+			return agency.NewImageMessage(agency.AssistantRole, imgBytes, ""), nil
 		},
 	)
 }

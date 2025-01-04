@@ -22,7 +22,7 @@ func main() {
 		).
 		Execute(
 			context.Background(),
-			agency.NewMessage(agency.UserRole, agency.TextKind, []byte("I love programming.")),
+			agency.NewTextMessage(agency.UserRole, "I love programming."),
 		)
 
 	if err != nil {
