@@ -1,5 +1,7 @@
 package agency
 
+import "encoding/json"
+
 type Message interface {
 	Role() Role
 	Content() []byte
@@ -13,6 +15,7 @@ const (
 	ImageKind     Kind = "image"
 	VoiceKind     Kind = "voice"
 	EmbeddingKind Kind = "embedding"
+	JSONKind      Kind = "json"
 )
 
 type Role string
@@ -28,18 +31,30 @@ const (
 
 type TextMessage struct {
 	role    Role
-	content string
+	content []byte
 }
 
 func (m TextMessage) Role() Role      { return m.role }
 func (m TextMessage) Kind() Kind      { return TextKind }
-func (m TextMessage) Content() []byte { return []byte(m.content) }
+func (m TextMessage) Content() []byte { return m.content }
 
 func NewTextMessage(role Role, content string) TextMessage {
 	return TextMessage{
-		content: content,
+		content: []byte(content),
 		role:    role,
 	}
+}
+
+// NewJSONTextMessage creates a text message from anything that can be marshalled to JSON.
+func NewJSONTextMessage(role Role, content any) (TextMessage, error) {
+	bb, err := json.Marshal(content)
+	if err != nil {
+		return TextMessage{}, err
+	}
+	return TextMessage{
+		content: bb,
+		role:    role,
+	}, nil
 }
 
 // --- Image Message ---

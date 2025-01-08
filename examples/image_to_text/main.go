@@ -22,7 +22,8 @@ func main() {
 		SetPrompt("describe what you see").
 		Execute(
 			context.Background(),
-			agency.NewImageMessage(agency.UserRole, imgBytes, ""),
+			// FIXME description not implemented properly and lead to 400 error
+			agency.NewImageMessage(agency.UserRole, imgBytes, "example.png"),
 		)
 	if err != nil {
 		panic(err)
