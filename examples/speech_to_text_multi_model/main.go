@@ -52,7 +52,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	speechMsg := agency.NewMessage(agency.UserRole, agency.VoiceKind, sound)
+	speechMsg := agency.NewVoiceMessage(agency.UserRole, sound)
 
 	_, err = agency.NewProcess(
 		hear,

@@ -36,7 +36,7 @@ func main() {
 		retrieve,
 		summarize,
 		voice,
-	).Execute(ctx, agency.NewMessage(agency.UserRole, agency.TextKind, []byte("programming")))
+	).Execute(ctx, agency.NewTextMessage(agency.UserRole, "programming"))
 	if err != nil {
 		panic(err)
 	}
@@ -76,10 +76,9 @@ func RAGoperation(client *weaviate.Client) *agency.Operation {
 			content += string(bb)
 		}
 
-		return agency.NewMessage(
+		return agency.NewTextMessage(
 			agency.AssistantRole,
-			agency.TextKind,
-			[]byte(content),
+			content,
 		), nil
 	})
 }
@@ -103,9 +102,9 @@ func prepareDB(openAPIKey string, ctx context.Context) (*weaviate.Client, error)
 	classObj := &models.Class{
 		Class:      "Records",
 		Vectorizer: "text2vec-openai",
-		ModuleConfig: map[string]interface{}{
-			"text2vec-openai":   map[string]interface{}{},
-			"generative-openai": map[string]interface{}{},
+		ModuleConfig: map[string]any{
+			"text2vec-openai":   map[string]any{},
+			"generative-openai": map[string]any{},
 		},
 	}
 	if err = client.Schema().ClassCreator().WithClass(classObj).Do(context.Background()); err != nil {

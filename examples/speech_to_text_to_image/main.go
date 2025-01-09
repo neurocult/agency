@@ -28,7 +28,7 @@ func main() {
 			Model:     goopenai.CreateImageModelDallE2,
 			ImageSize: goopenai.CreateImageSize256x256,
 		}),
-	).Execute(context.Background(), agency.NewMessage(agency.UserRole, agency.VoiceKind, data))
+	).Execute(context.Background(), agency.NewVoiceMessage(agency.UserRole, data))
 	if err != nil {
 		panic(err)
 	}

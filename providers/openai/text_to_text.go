@@ -38,7 +38,7 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 
 	return agency.NewOperation(
 		func(ctx context.Context, msg agency.Message, cfg *agency.OperationConfig) (agency.Message, error) {
-			openAIMessages, err := agencyToOpenaiMessages(cfg, msg)
+			openAIMessages, err := agencyToOpenAIMessages(cfg, msg)
 			if err != nil {
 				return nil, fmt.Errorf("text to stream: %w", err)
 			}
@@ -68,7 +68,10 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 				responseMessage := openAIResponse.Choices[0].Message
 
 				if len(responseMessage.ToolCalls) == 0 {
-					return OpenaiToAgencyMessage(responseMessage), nil
+					return agency.NewTextMessage(
+						agency.Role(responseMessage.Role),
+						responseMessage.Content,
+					), nil
 				}
 
 				openAIMessages = append(openAIMessages, responseMessage)
@@ -86,83 +89,5 @@ func (p Provider) TextToText(params TextToTextParams) *agency.Operation {
 				}
 			}
 		},
-	)
-}
-
-// === Helpers ===
-
-func castFuncDefsToOpenAITools(funcDefs []FuncDef) []openai.Tool {
-	tools := make([]openai.Tool, 0, len(funcDefs))
-	for _, f := range funcDefs {
-		tool := openai.Tool{
-			Type: openai.ToolTypeFunction,
-			Function: &openai.FunctionDefinition{
-				Name:        f.Name,
-				Description: f.Description,
-			},
-		}
-		if f.Parameters != nil {
-			tool.Function.Parameters = f.Parameters
-		}
-		tools = append(tools, tool)
-	}
-	return tools
-}
-
-func agencyToOpenaiMessages(cfg *agency.OperationConfig, msg agency.Message) ([]openai.ChatCompletionMessage, error) {
-	openAIMessages := make([]openai.ChatCompletionMessage, 0, len(cfg.Messages)+2)
-
-	openAIMessages = append(openAIMessages, openai.ChatCompletionMessage{
-		Role:    openai.ChatMessageRoleSystem,
-		Content: cfg.Prompt,
-	})
-
-	for _, cfgMsg := range cfg.Messages {
-		openAIMessages = append(openAIMessages, messageToOpenAI(cfgMsg))
-	}
-
-	openaiMsg := openai.ChatCompletionMessage{
-		Role: openai.ChatMessageRoleUser,
-	}
-
-	switch msg.Kind() {
-	case agency.TextKind:
-		openaiMsg.Content = string(msg.Content())
-	case agency.ImageKind:
-		openaiMsg.MultiContent = append(
-			openaiMsg.MultiContent,
-			openAIBase64ImageMessage(msg.Content()),
-		)
-	default:
-		return nil, fmt.Errorf("operator doesn't support %s kind", msg.Kind())
-	}
-
-	openAIMessages = append(openAIMessages, openaiMsg)
-
-	return openAIMessages, nil
-}
-
-func callTool(
-	ctx context.Context,
-	call openai.ToolCall,
-	defs FuncDefs,
-) (agency.Message, error) {
-	funcToCall := defs.getFuncDefByName(call.Function.Name)
-	if funcToCall == nil {
-		return nil, errors.New("function not found")
-	}
-
-	funcResult, err := funcToCall.Body(ctx, []byte(call.Function.Arguments))
-	if err != nil {
-		return funcResult, fmt.Errorf("call function %s: %w", funcToCall.Name, err)
-	}
-
-	return funcResult, nil
-}
-
-func OpenaiToAgencyMessage(msg openai.ChatCompletionMessage) agency.Message {
-	return agency.NewTextMessage(
-		agency.Role(msg.Role),
-		msg.Content,
 	)
 }

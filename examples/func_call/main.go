@@ -69,7 +69,7 @@ Examples:
 	// test for first function call
 	answer, err := t2tOp.Execute(
 		ctx,
-		agency.NewMessage(agency.UserRole, agency.TextKind, []byte("what is the meaning of life?")),
+		agency.NewTextMessage(agency.UserRole, "what is the meaning of life?"),
 	)
 	if err != nil {
 		panic(err)
@@ -79,7 +79,7 @@ Examples:
 	// test for second function call
 	answer, err = t2tOp.Execute(
 		ctx,
-		agency.NewMessage(agency.UserRole, agency.TextKind, []byte("1+1?")),
+		agency.NewTextMessage(agency.UserRole, "1+1?"),
 	)
 	if err != nil {
 		panic(err)
@@ -89,7 +89,7 @@ Examples:
 	// test for both function calls at the same time
 	answer, err = t2tOp.Execute(
 		ctx,
-		agency.NewMessage(agency.UserRole, agency.TextKind, []byte("1+1 and what is the meaning of life?")),
+		agency.NewTextMessage(agency.UserRole, "1+1 and what is the meaning of life?"),
 	)
 	if err != nil {
 		panic(err)

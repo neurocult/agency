@@ -5,7 +5,7 @@ import "encoding/json"
 type Message interface {
 	Role() Role
 	Content() []byte
-	Kind() Kind
+	Kind() Kind // do we need this?
 }
 
 type Kind string
@@ -15,6 +15,7 @@ const (
 	ImageKind     Kind = "image"
 	VoiceKind     Kind = "voice"
 	EmbeddingKind Kind = "embedding"
+	JSONKind      Kind = "json"
 )
 
 type Role string
@@ -26,51 +27,92 @@ const (
 	ToolRole      Role = "tool"
 )
 
-type BaseMessage struct {
-	content []byte
+// --- Text Message ---
+
+type TextMessage struct {
 	role    Role
-	kind    Kind
+	content []byte
 }
 
-func (bm BaseMessage) Role() Role {
-	return bm.role
-}
+func (m TextMessage) Role() Role      { return m.role }
+func (m TextMessage) Kind() Kind      { return TextKind }
+func (m TextMessage) Content() []byte { return m.content }
 
-func (bm BaseMessage) Kind() Kind {
-	return bm.kind
-}
-func (bm BaseMessage) Content() []byte {
-	return bm.content
-}
-
-// NewMessage creates new `Message` with the specified `Role` and `Kind`
-func NewMessage(role Role, kind Kind, content []byte) BaseMessage {
-	return BaseMessage{
-		content: content,
-		role:    role,
-		kind:    kind,
-	}
-}
-
-// NewTextMessage creates new `Message` with Text kind and the specified `Role`
-func NewTextMessage(role Role, content string) BaseMessage {
-	return BaseMessage{
+func NewTextMessage(role Role, content string) TextMessage {
+	return TextMessage{
 		content: []byte(content),
 		role:    role,
-		kind:    TextKind,
 	}
 }
 
-// NewJsonMessage marshals content and creates new `Message` with text kind and the specified `Role`
-func NewJsonMessage(role Role, content any) (BaseMessage, error) {
-	data, err := json.Marshal(content)
+// NewJSONTextMessage creates a text message from anything that can be marshalled to JSON.
+func NewJSONTextMessage(role Role, content any) (TextMessage, error) {
+	bb, err := json.Marshal(content)
 	if err != nil {
-		return BaseMessage{}, err
+		return TextMessage{}, err
 	}
-
-	return BaseMessage{
-		content: data,
+	return TextMessage{
+		content: bb,
 		role:    role,
-		kind:    TextKind,
 	}, nil
+}
+
+// --- Image Message ---
+
+type ImageMessage struct {
+	role        Role
+	content     []byte
+	description string
+}
+
+func (m ImageMessage) Role() Role          { return m.role }
+func (m ImageMessage) Kind() Kind          { return ImageKind }
+func (m ImageMessage) Content() []byte     { return m.content }
+func (m ImageMessage) Description() string { return m.description }
+
+// NewImageMessage creates new image message.
+// Empty byte slice is NOT a valid content.
+// Empty string IS valid description.
+func NewImageMessage(role Role, content []byte, description string) ImageMessage {
+	return ImageMessage{
+		content:     content,
+		description: description,
+		role:        role,
+	}
+}
+
+// --- Voice Message ---
+
+type VoiceMessage struct {
+	role    Role
+	content []byte
+}
+
+func (m VoiceMessage) Role() Role      { return m.role }
+func (m VoiceMessage) Kind() Kind      { return VoiceKind }
+func (m VoiceMessage) Content() []byte { return m.content }
+
+func NewVoiceMessage(role Role, content []byte) VoiceMessage {
+	return VoiceMessage{
+		content: content,
+		role:    role,
+	}
+}
+
+// --- Embedding Message ---
+
+type EmbeddingMessage struct {
+	role    Role
+	content []byte
+}
+
+func (m EmbeddingMessage) Role() Role      { return m.role }
+func (m EmbeddingMessage) Kind() Kind      { return EmbeddingKind }
+func (m EmbeddingMessage) Content() []byte { return m.content }
+
+func NewEmbeddingMessage(role Role, content []byte) EmbeddingMessage {
+	return EmbeddingMessage{
+		content: content,
+		role:    role,
+	}
 }

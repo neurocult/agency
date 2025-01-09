@@ -26,7 +26,7 @@ func main() {
 		Style:     "vivid",
 	}).Execute(
 		context.Background(),
-		agency.NewMessage(agency.UserRole, agency.TextKind, []byte("Halloween night at a haunted museum")),
+		agency.NewTextMessage(agency.UserRole, "Halloween night at a haunted museum"),
 	)
 	if err != nil {
 		panic(err)

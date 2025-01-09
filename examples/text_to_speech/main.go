@@ -11,12 +11,12 @@ import (
 )
 
 func main() {
-	input := agency.NewMessage(
+	input := agency.NewTextMessage(
 		agency.UserRole,
-		agency.TextKind,
-		[]byte(`One does not simply walk into Mordor.
-Its black gates are guarded by more than just Orcs.
-There is evil there that does not sleep, and the Great Eye is ever watchful.`))
+		`One does not simply walk into Mordor.
+		Its black gates are guarded by more than just Orcs.
+		There is evil there that does not sleep, and the Great Eye is ever watchful.`,
+	)
 
 	msg, err := openai.New(openai.Params{Key: os.Getenv("OPENAI_API_KEY")}).
 		TextToSpeech(openai.TextToSpeechParams{
