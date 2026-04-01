@@ -78,6 +78,8 @@ See [examples](./examples/) to find out more complex usecases including RAGs and
 
 ✨ **OpenAI API bindings** (can be used for any openai-compatable API: text to text (completion), text to image, text to speech, speech to text
 
+✨ **[MiniMax](https://www.minimax.io) provider** (`providers/minimax`) — drop-in support for MiniMax-M2.7 and MiniMax-M2.5 models with 204 K context; requires only `MINIMAX_API_KEY`
+
 <!-- TODO v0.1.0
 - [ ] Name the organization
 - [ ] Reorganize folders and packages -->
@@ -100,7 +102,7 @@ In the next versions:
 
 - [x] Support for external function calls
 - [ ] Metadata (tokens used, audio duration, etc)
-- [ ] More provider-adapters, not only openai
+- [x] More provider-adapters, not only openai (MiniMax added)
 - [x] Image to text operations
 - [ ] Powerful API for autonomous agents
 - [ ] Tagging and JSON output parser
